@@ -1176,9 +1176,16 @@ async function loadOvNews(force){
   const pl=newsPlan(),m=pl.modes.find(x=>x[0]===S.newsMode)||pl.modes[0],key=m[2];
   const c=S.ovnews[key];if(!force&&c&&Date.now()-c.t<15*6e4)return;
   try{
-    const proxy=proxyUrl();let items;
-    if(proxy)items=parseNews(await getText(proxy+'/rss?url='+enc(m[2])));
-    else{const j=await getJSON('https://api.rss2json.com/v1/api.json?rss_url='+enc(m[2]));items=(j.items||[]).map(i=>({title:i.title,src:'',link:i.link,date:i.pubDate,rel:[]}))}
+    const proxy=proxyUrl();let items=null;
+    if(proxy){try{items=parseNews(await getText(proxy+'/rss?url='+enc(m[2])));if(!items.length)items=null}catch(e){items=null}}
+    if(!items){ // fallback: public RSS-to-JSON service
+      const j=await getJSON('https://api.rss2json.com/v1/api.json?rss_url='+enc(m[2]));
+      items=(j.items||[]).slice(0,15).map(i=>{
+        let t=String(i.title||''),src='';const k=t.lastIndexOf(' - ');if(k>0){src=t.slice(k+3);t=t.slice(0,k)}
+        const rel=[];try{const d=new DOMParser().parseFromString(i.description||'','text/html');d.querySelectorAll('li').forEach(li=>{const a=li.querySelector('a');if(a&&a.textContent.trim()&&a.textContent.trim()!==t)rel.push({title:a.textContent.trim(),link:a.href,src:(li.querySelector('font')?.textContent||'').trim()})})}catch(e){}
+        return {title:t,src,link:i.link,date:String(i.pubDate||'').replace(' ','T')+'Z',rel:rel.slice(0,4)}}).filter(n=>n.title&&n.link);
+      if(!items.length)throw new Error('No headlines returned');
+    }
     S.ovnews[key]={t:Date.now(),items};delete S.errors.ovnews;
   }catch(e){fail('ovnews',e)}
 }
