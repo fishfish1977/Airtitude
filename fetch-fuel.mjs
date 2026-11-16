@@ -1,4 +1,4 @@
-// Reads Singapore pump prices from motorist.sg/petrol-prices and writes data/fuelsg.json.
+// Reads Singapore pump prices from motorist.sg/petrol-prices and writes fuelsg.json.
 // Runs on GitHub Actions every few hours. Tries a plain request first, then a real headless browser.
 import { writeFileSync, readFileSync, existsSync } from 'node:fs';
 
@@ -59,10 +59,10 @@ async function viaBrowser() {
 
 if (process.argv[1] && process.argv[1].endsWith('fetch-fuel.mjs')) {
   const p = (await viaFetch()) || (await viaBrowser());
-  if (!p) { console.log('No prices read; leaving data/fuelsg.json unchanged.'); process.exit(0); }
-  const old = existsSync('data/fuelsg.json') ? JSON.parse(readFileSync('data/fuelsg.json', 'utf8')) : {};
+  if (!p) { console.log('No prices read; leaving fuelsg.json unchanged.'); process.exit(0); }
+  const old = existsSync('fuelsg.json') ? JSON.parse(readFileSync('fuelsg.json', 'utf8')) : {};
   const changed = JSON.stringify(old.prices) !== JSON.stringify(p.prices);
   const out = { ...p, asOf: new Date().toISOString().slice(0, 10), checked: new Date().toISOString(), live: true, source: 'motorist.sg' };
-  writeFileSync('data/fuelsg.json', JSON.stringify(out, null, 1) + '\n');
+  writeFileSync('fuelsg.json', JSON.stringify(out, null, 1) + '\n');
   console.log(changed ? 'prices changed' : 'prices unchanged', JSON.stringify(p.prices));
 }
