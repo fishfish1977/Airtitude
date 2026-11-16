@@ -5,11 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>SG–MY Weather, Air, Health & Traffic</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap">
+<!-- Proxima Nova is a licensed font. To use the real one: create a free Adobe Fonts web project containing "Proxima Nova", then add its
+     <link rel="stylesheet" href="https://use.typekit.net/YOURKIT.css"> line here. Until then, Figtree (a close free look-alike) is the fallback. -->
 <style>
 :root{--bg:#f3f5f9;--card:#fff;--ink:#14213d;--mute:#5b667a;--line:#e3e7ef;--brand:#0b5cff;--navy:#0a2342;
 --good:#2e9e5b;--mod:#e0b100;--usg:#f08a24;--bad:#d8403a;--vbad:#8b3fa8;--haz:#6d1a2b;--rad:14px}
 *{box-sizing:border-box}
-html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 "Proxima Nova",proxima-nova,"Figtree",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+.leaflet-container,.leaflet-tooltip,.leaflet-popup-content{font-family:inherit}
+svg text{font-family:inherit}
 header{background:linear-gradient(135deg,#0a2342,#0b5cff);color:#fff;padding:14px 16px 0;position:sticky;top:0;z-index:1000}
 .hrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 h1{font-size:18px;margin:0;flex:1;min-width:200px}
@@ -97,6 +103,10 @@ footer{color:var(--mute);font-size:12px;padding:10px 14px;max-width:1100px;margi
 .xt .nm{font-size:13px;font-weight:700;opacity:.95}.xt .mins{font-size:46px;font-weight:800;line-height:1.05;margin:4px 0 0;letter-spacing:-1px}.xt .mins small{font-size:15px;font-weight:700;letter-spacing:0;margin-left:2px}
 .xt .st{font-size:13px;font-weight:700;margin-top:2px;background:rgba(255,255,255,.22);display:inline-block;border-radius:20px;padding:2px 10px}
 .xt .best{position:absolute;top:-9px;right:8px;background:#fff;color:#14213d;font-size:11px;font-weight:800;border-radius:20px;padding:2px 8px;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+
+.nws{display:flex;gap:10px;align-items:flex-start;padding:10px 4px;border-top:1px solid var(--line);cursor:pointer}.nws:first-child{border-top:0}.nws:hover{background:#f7f9fd}
+.nws .nt{font-weight:600;line-height:1.3}.nws .ns{font-size:12px;color:var(--mute);margin-top:2px}.nws .ni{font-size:22px}
+.nrel{display:block;padding:7px 0;border-top:1px solid var(--line);font-size:14px}
 </style>
 </head>
 <body>
@@ -122,8 +132,31 @@ footer{color:var(--mute);font-size:12px;padding:10px 14px;max-width:1100px;margi
 <section class="tab on" id="t-overview">
  <div class="row" style="margin-bottom:10px"><b>Showing for</b><select id="ovSel"></select><span class="small mute" id="ovHint"></span></div>
  <div class="grid tiles" id="ovTiles"></div>
+ <div class="card" id="ovGuide" style="margin-top:16px">
+  <h2>🚇 Getting around Singapore <span class="small mute">public transport guide</span></h2>
+  <div id="ovTrStatus"></div>
+  <div class="lines" id="ovLines"></div>
+  <div class="row" style="margin-top:4px">
+   <input type="text" id="ovFrom" placeholder="From (blank = my location)" style="flex:1;min-width:170px">
+   <input type="text" id="ovTo" placeholder="To e.g. Changi Airport" style="flex:1;min-width:170px">
+   <button class="btn2" id="ovGo">Get directions ↗</button>
+  </div>
+  <div class="row" style="margin-top:8px">
+   <span class="small mute">Quick:</span>
+   <button class="btn2 alt" data-oq="Woodlands Checkpoint|Woodlands MRT Station">Checkpoint → MRT</button>
+   <button class="btn2 alt" data-oq="Changi Airport|Marina Bay Sands">Airport → MBS</button>
+   <button class="btn2 alt" data-oq="Jurong East MRT Station|Orchard MRT Station">Jurong East → Orchard</button>
+  </div>
+  <div class="small mute" style="margin-top:8px">More on the <a href="#" data-go-tab="transit">Public Transport</a> tab · disruption news included.</div>
+ </div>
  <h3 style="margin-top:16px">Other places · tap to switch</h3>
  <div class="grid" id="cityCards"></div>
+
+ <div class="card" id="ovNews" style="margin-top:16px">
+  <h2>📰 Top headlines <span class="small mute" id="ovNewsFor"></span></h2>
+  <div class="seg" id="ovNewsSeg" style="margin:4px 0 8px"></div>
+  <div id="ovNewsList"><span class="mute">Loading headlines…</span></div>
+ </div>
 </section>
 
 <section class="tab" id="t-weather">
@@ -680,7 +713,7 @@ function renderTraffic(){
 }
 function renderAll(){
   const safe=f=>{try{f()}catch(e){console.error(f.name,e)}};
-  safe(renderOverview);safe(renderWeather);safe(renderWind);safe(renderAir);safe(renderHealth);safe(renderTraffic);safe(renderCrossings);safe(renderTransit);
+  safe(renderOverview);safe(renderWeather);safe(renderWind);safe(renderAir);safe(renderHealth);safe(renderTraffic);safe(renderCrossings);safe(renderTransit);safe(renderOvGuide);safe(renderOvNews);safe(ovNewsTick);
 }
 /* ============================ cloud map ============================ */
 const VIEWS={
@@ -774,7 +807,7 @@ $('#btnRefresh').onclick=()=>refresh();
 let busy=false;
 async function refresh(){
   if(busy)return;busy=true;$('#stamp').textContent='Updating…';S.errors={};
-  const jobs=[loadWeather(),loadAir(),loadSG(),loadMY(),loadTraffic(),loadTransit(),loadCrossings()];
+  const jobs=[loadWeather(),loadAir(),loadSG(),loadMY(),loadTraffic(),loadTransit(),loadCrossings(),loadOvNews()];
   // render progressively
   jobs.forEach(p=>p.then(renderAll));
   await Promise.allSettled(jobs);renderAll();
@@ -1023,6 +1056,16 @@ function renderAlertBar(al){
 }
 /* ---------- detail popups ---------- */
 function detailHTML(kind,a1,a2){
+  if(kind==='news'||kind==='newslist'){
+    const list=curNews()||[];
+    if(kind==='newslist')return `<h2 style="margin-top:0">📰 Headlines</h2>`+list.map((n,i)=>`<div class="nws" data-detail="news:${i}"><span class="ni">📰</span><div><div class="nt">${esc(n.title)}</div><div class="ns">${esc(n.src)}${n.src&&n.date?' · ':''}${agoTxt(n.date)}</div></div></div>`).join('');
+    const i=+a1,n=list[i];if(!n)return '<div class="err">Headline not available.</div>';
+    return `<div class="small mute">${esc(n.src)}${n.src&&n.date?' · ':''}${agoTxt(n.date)}</div><h2 style="margin:4px 0 10px;line-height:1.3">${esc(n.title)}</h2>
+     <div class="row"><a class="btn2" target="_blank" rel="noopener" href="${esc(n.link)}">Read the full story${n.src?' on '+esc(n.src):''} ↗</a></div>
+     ${n.rel.length?`<h3>Other coverage of this story</h3>${n.rel.map(r=>`<a class="nrel" target="_blank" rel="noopener" href="${esc(r.link)}">${esc(r.title)}${r.src?` <span class="mute">· ${esc(r.src)}</span>`:''}</a>`).join('')}`:''}
+     <div class="row" style="margin-top:12px;justify-content:space-between"><button class="btn2 alt" data-nav="${i-1}" ${i<=0?'disabled':''}>‹ Previous</button><button class="btn2 alt" data-nav="${i+1}" ${i>=list.length-1?'disabled':''}>Next ›</button></div>
+     <div class="small mute" style="margin-top:8px">Headlines come from Google News. Full articles open on the publisher's own site.</div>`;
+  }
   if(kind==='weather'){
     const x=curOf(a1),c=cityOf(a1);if(!x)return '<div class="err">No weather data yet.</div>';
     const [ic,tx]=WMO(x.c.weather_code),h=x.h,i=x.i;
@@ -1083,12 +1126,78 @@ document.addEventListener('click',e=>{
   const t=e.target.closest('[data-detail]');if(!t||e.target.closest('a,select,button,input'))return;
   const [k,a,b]=t.dataset.detail.split(':');openDetail(k,a,b);
 });
+$('#dlg2Body').addEventListener('click',e=>{const b=e.target.closest('[data-nav]');if(b&&!b.disabled)openDetail('news',b.dataset.nav)});
 $('#dlg2Close').onclick=()=>$('#dlg2').close();
 $('#dlg2').addEventListener('click',e=>{if(e.target===$('#dlg2'))$('#dlg2').close()});
 $('#ovSel').onchange=e=>{S.userPicked=true;S.sel=e.target.value;store.set('city',S.sel);$('#citySel').value=S.sel;renderAll()};
 $('#aqHeroSel').onchange=e=>{S.aqPicked=true;$('#aqCity').value=e.target.value;renderAir()};
 $('#aqCity').addEventListener('change',()=>{S.aqPicked=true});
 
+
+/* ---------- Overview: public transport guide ---------- */
+function renderOvGuide(){
+  const st=$('#ovTrStatus');if(!st)return;
+  const segs=S.train?(S.train.AffectedSegments||[]):[],bad=new Set(segs.map(x=>String(x.Line||'').toUpperCase())),known=!!S.train;
+  st.innerHTML=`<div class="trhero">${trainSVG(110)}<div><div class="big" style="font-size:18px">MRT &amp; LRT right now</div><div class="small ${bad.size?'err':'mute'}">${known?(bad.size?`⚠️ ${bad.size} line${bad.size>1?'s':''} affected – tap a line`:'✅ All lines running normally'):'Live status unavailable right now'}</div></div><div class="sp"></div>${busSVG(80)}</div>`;
+  $('#ovLines').innerHTML=MRT_LINES.map(([c,n,col])=>{const b=bad.has(c);return `<div class="ln ${b?'bad':''}" data-detail="line:${c}"><span class="lb" style="background:${col}">${c}</span><div><b>${n}</b><div class="small ${b?'err':'mute'}">${!known?'Unknown':b?'⚠️ Disrupted':'✅ Normal'}</div></div></div>`}).join('')+
+   `<div class="ln mapt" data-detail="mrtmap"><span class="lb" style="background:#14213d">🗺️</span><div><b>MRT network map</b><div class="small mute">Tap to see all lines</div></div></div>`;
+}
+$('#ovGo').onclick=()=>{const f=$('#ovFrom').value.trim(),t=$('#ovTo').value.trim();if(!t){$('#ovTo').focus();return}
+  const sg=x=>/singapore/i.test(x)?x:x+', Singapore';
+  window.open('https://www.google.com/maps/dir/?api=1'+(f?'&origin='+enc(sg(f)):'')+'&destination='+enc(sg(t))+'&travelmode=transit','_blank','noopener')};
+$$('[data-oq]').forEach(b=>b.onclick=()=>{const [a,z]=b.dataset.oq.split('|');$('#ovFrom').value=a;$('#ovTo').value=z});
+$$('[data-go-tab]').forEach(a=>a.onclick=e=>{e.preventDefault();go(a.dataset.goTab)});
+
+/* ---------- Overview: top headlines (local to the chosen place) ---------- */
+S.ovnews=S.ovnews||{};S.newsMode=S.newsMode||'local';
+const NEWS_LOC={SG:'hl=en-SG&gl=SG&ceid=SG:en',MY:'hl=en-MY&gl=MY&ceid=MY:en'};
+function newsPlan(){
+  const c=cityOf(S.sel),cc=c.cc||'SG',loc=NEWS_LOC[cc],base='https://news.google.com/rss/';
+  const place=cc==='SG'?'Singapore':(c.my||(c.name||'').replace(/^📍 My location\s*/,'').replace(/[()]/g,'').replace(/^near /,'')||'Malaysia');
+  const country=cc==='SG'?'Singapore':'Malaysia';
+  const geo=n=>base+'headlines/section/geo/'+enc(n)+'?'+loc;
+  const srch=q=>base+'search?q='+enc(q)+'&'+loc;
+  const modes=cc==='SG'
+    ?[['local','🇸🇬 Singapore top stories',geo('Singapore')],['transport','🚦 Traffic & transport',srch('(MRT OR LRT OR bus OR traffic OR LTA OR road) Singapore when:2d')]]
+    :[['local','📍 '+place,place===country?geo('Malaysia'):geo(place)],['country','🇲🇾 Malaysia top stories',geo('Malaysia')],['transport','🚦 Traffic & roads',srch('(traffic OR highway OR road OR accident OR "Johor Bahru" OR causeway) '+country+' when:2d')]];
+  return {cc,place,country,modes};
+}
+function parseNews(xml){
+  const x=new DOMParser().parseFromString(xml,'text/xml');
+  return [...x.querySelectorAll('item')].slice(0,15).map(i=>{
+    const t=i.querySelector('title')?.textContent||'',src=i.querySelector('source')?.textContent||'';
+    let title=t;if(src&&t.endsWith(' - '+src))title=t.slice(0,-(src.length+3));
+    const rel=[];try{const d=new DOMParser().parseFromString(i.querySelector('description')?.textContent||'','text/html');
+      d.querySelectorAll('li').forEach(li=>{const a=li.querySelector('a');if(a&&a.textContent.trim()&&a.textContent.trim()!==title)rel.push({title:a.textContent.trim(),link:a.href,src:(li.querySelector('font')?.textContent||'').trim()})})}catch(e){}
+    return {title,src,link:i.querySelector('link')?.textContent||'',date:i.querySelector('pubDate')?.textContent||'',rel:rel.slice(0,4)};
+  }).filter(n=>n.title&&n.link);
+}
+async function loadOvNews(force){
+  const pl=newsPlan(),m=pl.modes.find(x=>x[0]===S.newsMode)||pl.modes[0],key=m[2];
+  const c=S.ovnews[key];if(!force&&c&&Date.now()-c.t<15*6e4)return;
+  try{
+    const proxy=proxyUrl();let items;
+    if(proxy)items=parseNews(await getText(proxy+'/rss?url='+enc(m[2])));
+    else{const j=await getJSON('https://api.rss2json.com/v1/api.json?rss_url='+enc(m[2]));items=(j.items||[]).map(i=>({title:i.title,src:'',link:i.link,date:i.pubDate,rel:[]}))}
+    S.ovnews[key]={t:Date.now(),items};delete S.errors.ovnews;
+  }catch(e){fail('ovnews',e)}
+}
+const agoTxt=d=>{const t=Date.parse(d);if(!t)return '';const m=Math.max(0,Math.round((Date.now()-t)/6e4));return m<60?m+' min ago':m<1440?Math.round(m/60)+' h ago':Math.round(m/1440)+' d ago'};
+function curNews(){const pl=newsPlan(),m=pl.modes.find(x=>x[0]===S.newsMode)||pl.modes[0];return (S.ovnews[m[2]]||{}).items||null}
+function renderOvNews(){
+  const seg=$('#ovNewsSeg');if(!seg)return;
+  const pl=newsPlan();if(!pl.modes.some(x=>x[0]===S.newsMode))S.newsMode='local';
+  seg.innerHTML=pl.modes.map(([k,l])=>`<button data-nm="${k}" class="${k===S.newsMode?'on':''}">${esc(l)}</button>`).join('');
+  $$('#ovNewsSeg [data-nm]').forEach(b=>b.onclick=()=>{S.newsMode=b.dataset.nm;renderOvNews();loadOvNews().then(renderOvNews)});
+  $('#ovNewsFor').textContent=S.sel==='me'?'near you':'';
+  const list=curNews(),box=$('#ovNewsList');
+  if(!list){box.innerHTML=S.errors.ovnews?errBox('ovnews'):'<span class="mute">Loading headlines…</span>';return}
+  if(!list.length){box.innerHTML='<span class="mute">No headlines found right now.</span>';return}
+  box.innerHTML=list.slice(0,6).map((n,i)=>`<div class="nws" data-detail="news:${i}"><span class="ni">📰</span><div><div class="nt">${esc(n.title)}</div><div class="ns">${esc(n.src)}${n.src&&n.date?' · ':''}${agoTxt(n.date)}</div></div></div>`).join('')+
+   (list.length>6?`<div class="row" style="margin-top:8px"><span class="btn2 alt" data-detail="newslist">See all ${list.length} headlines ›</span></div>`:'');
+}
+let _lastNewsKey='';
+function ovNewsTick(){const k=S.sel+'|'+S.newsMode;if(k!==_lastNewsKey){_lastNewsKey=k;loadOvNews().then(renderOvNews)}}
 /* Settings button is hidden from visitors. Open the page once with ?admin=1 to show it on your own browser; ?admin=0 hides it again. */
 try{const q=new URLSearchParams(location.search).get('admin');if(q==='1')store.set('admin','1');if(q==='0')store.set('admin','');}catch(e){}
 if(!store.get('admin')){const b=document.getElementById('btnSet');if(b)b.style.display='none';}
