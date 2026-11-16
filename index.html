@@ -88,6 +88,15 @@ footer{color:var(--mute);font-size:12px;padding:10px 14px;max-width:1100px;margi
 .abar-top{display:flex;align-items:center;gap:8px}.abar-t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .abtn{border:0;background:#eef2fb;color:var(--navy);border-radius:8px;padding:3px 9px;cursor:pointer;font-weight:700;font-size:12px}.abtn:hover{background:#dfe6f5}
 .abar-list{margin-top:6px;border-top:1px solid var(--line);padding-top:6px}.abar-list>div{padding:3px 0}
+
+.xdash{display:grid;grid-template-columns:1fr 1fr;gap:14px}@media(max-width:720px){.xdash{grid-template-columns:1fr}}
+.xpanel{border-radius:18px;padding:14px;background:#f4f7fc;border:1px solid var(--line)}
+.xhead{display:flex;align-items:center;gap:10px;margin-bottom:10px}.xhead .fl{font-size:26px}.xhead b{font-size:18px;line-height:1.15}
+.xtiles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.xt{position:relative;border-radius:16px;padding:12px 10px 10px;color:#fff;text-align:center;cursor:pointer}
+.xt .nm{font-size:13px;font-weight:700;opacity:.95}.xt .mins{font-size:46px;font-weight:800;line-height:1.05;margin:4px 0 0;letter-spacing:-1px}.xt .mins small{font-size:15px;font-weight:700;letter-spacing:0;margin-left:2px}
+.xt .st{font-size:13px;font-weight:700;margin-top:2px;background:rgba(255,255,255,.22);display:inline-block;border-radius:20px;padding:2px 10px}
+.xt .best{position:absolute;top:-9px;right:8px;background:#fff;color:#14213d;font-size:11px;font-weight:800;border-radius:20px;padding:2px 8px;box-shadow:0 1px 4px rgba(0,0,0,.2)}
 </style>
 </head>
 <body>
@@ -133,7 +142,7 @@ footer{color:var(--mute);font-size:12px;padding:10px 14px;max-width:1100px;margi
 
 <section class="tab" id="t-clouds">
  <div class="card">
-  <h2>Moving clouds · past 24 h → next 24 h <span class="badge now" id="frameBadge">Now</span></h2>
+  <h2>Moving clouds · past 24 hours → next 24 hours <span class="badge now" id="frameBadge">Now</span></h2>
   <div class="ctl">
    <select id="viewSel">
     <option value="sg">Singapore &amp; Johor (close-up)</option>
@@ -168,7 +177,7 @@ footer{color:var(--mute);font-size:12px;padding:10px 14px;max-width:1100px;margi
  <div class="alert blue small">How to read this: the air quality score goes from 0 (clean) upwards – <b>lower is better</b>. “Fine dust” (PM2.5) is the tiny smoke and haze particles that can reach deep into your lungs.</div>
  <div class="g2">
   <div class="card"><h2>Singapore · official air quality <span class="small mute" id="psiTs"></span></h2><div id="psiBox"></div></div>
-  <div class="card"><h2>Air quality now &amp; next 24 h <span class="small mute">score out of 500 · forecast</span></h2><div id="aqTable"></div></div>
+  <div class="card"><h2>Air quality now &amp; next 24 hours <span class="small mute">score out of 500 · forecast</span></h2><div id="aqTable"></div></div>
  </div>
  <div class="card" style="margin-top:12px"><h2>Trend &amp; forecast <select id="aqCity"></select></h2><div id="aqNarr"></div><div id="chAqi"></div>
   <h3>Fine dust – tiny particles in the air (lower is better)</h3><div id="chPm"></div>
@@ -287,7 +296,9 @@ function nowIdx(times){
 const tm=t=>t.slice(11,16);
 const dayName=t=>new Date(t.slice(0,10)+'T12:00:00+08:00').toLocaleDateString('en-SG',{weekday:'short',day:'numeric',month:'short',timeZone:TZ});
 const DIRS=['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
-const compass=d=>DIRS[Math.round((((d%360)+360)%360)/22.5)%16];
+const WORDS=['North','North-east','East','South-east','South','South-west','West','North-west'];
+const compass=d=>WORDS[Math.round((((d%360)+360)%360)/45)%8];
+const compassLow=d=>'the '+compass(d).toLowerCase();
 const angDiff=(a,b)=>{const d=Math.abs(a-b)%360;return d>180?360-d:d};
 const circMean=a=>{let x=0,y=0;a.forEach(v=>{x+=Math.cos(v*Math.PI/180);y+=Math.sin(v*Math.PI/180)});return (Math.atan2(y,x)*180/Math.PI+360)%360};
 const arrow=(deg,sz=18,col='#0b5cff')=>`<svg width="${sz}" height="${sz}" viewBox="-10 -10 20 20" style="transform:rotate(${Math.round(deg+180)}deg);vertical-align:middle"><path d="M0-8 L5 6 L0 3 L-5 6Z" fill="${col}"/></svg>`;
@@ -489,14 +500,14 @@ function aqNow(id){
 }
 function windOutlook(h,i0){
   const out=[],n=Math.min(i0+25,h.time.length),d0=h.wind_direction_10m[i0],s0=h.wind_speed_10m[i0];
-  for(let k=i0+1;k<n;k++){if(h.wind_speed_10m[k]>=4&&angDiff(h.wind_direction_10m[k],d0)>=60){out.push({k:'shift',icon:'🔄',text:`Wind shifts from <b>${compass(d0)}</b> to <b>${compass(h.wind_direction_10m[k])}</b> around ${tm(h.time[k])} (in ${k-i0} h).`});break}}
+  for(let k=i0+1;k<n;k++){if(h.wind_speed_10m[k]>=4&&angDiff(h.wind_direction_10m[k],d0)>=60){out.push({k:'shift',icon:'🔄',text:`Wind changes direction: blowing from <b>${compassLow(d0)}</b> now, from <b>${compassLow(h.wind_direction_10m[k])}</b> around ${tm(h.time[k])} (in ${k-i0} ${k-i0===1?'hour':'hours'}).`});break}}
   let gi=i0,gm=-1;for(let k=i0;k<n;k++){if((h.wind_gusts_10m[k]||0)>gm){gm=h.wind_gusts_10m[k];gi=k}}
   if(gm>=30&&gm>=s0*1.5)out.push({k:'gust',icon:'💨',text:`Gusts up to <b>${round(gm)} km/h</b> around ${tm(h.time[gi])}${gi===i0?' (now)':' (in '+(gi-i0)+' h)'}.`});
   let mx=s0,mi=i0,mn=s0,ni=i0;for(let k=i0;k<n;k++){const v=h.wind_speed_10m[k];if(v>mx){mx=v;mi=k}if(v<mn){mn=v;ni=k}}
   if(mx>=s0+8)out.push({k:'up',icon:'⬆️',text:`Wind strengthens to ~<b>${round(mx)} km/h</b> by ${tm(h.time[mi])}.`});
   else if(mn<=s0-8)out.push({k:'down',icon:'⬇️',text:`Wind eases to ~<b>${round(mn)} km/h</b> by ${tm(h.time[ni])}.`});
   for(let k=i0;k<n;k++){if(h.weather_code[k]>=95){out.push({k:'ts',icon:'⛈️',text:`Thunderstorm risk around ${tm(h.time[k])} – expect sudden gusts.`});break}}
-  if(!out.length)out.push({k:'steady',icon:'✅',text:`Wind steady from ${compass(d0)} at about ${round(s0)} km/h for the next 24 h.`});
+  if(!out.length)out.push({k:'steady',icon:'✅',text:`Wind steady from ${compassLow(d0)} at about ${round(s0)} km/h for the next 24 hours.`});
   return out;
 }
 function renderWeather(){
@@ -539,7 +550,7 @@ function renderWeather(){
 function renderWind(){
   const id=$('#windCity').value||'sg',x=curOf(id);
   $('#windOut').innerHTML=x?`<div class="row"><span style="font-size:40px">${arrow(x.c.wind_direction_10m,44)}</span><div><div class="big" style="font-size:26px">${compass(x.c.wind_direction_10m)} ${round(x.c.wind_speed_10m)} km/h</div><div class="small mute">from ${round(x.c.wind_direction_10m)}° · gusts ${round(x.c.wind_gusts_10m)} km/h</div></div></div><h3>Expected changes · next 24 h</h3>${windOutlook(x.h,x.i).map(o=>`<div class="alert ${o.k==='steady'?'green':'blue'}">${o.icon} ${o.text}</div>`).join('')}
-    <h3>Direction every 3 h</h3><div class="hrs">${[0,3,6,9,12,15,18,21,24].map(k=>`<div class="hr"><b>${k===0?'Now':tm(x.h.time[x.i+k])}</b><br>${arrow(x.h.wind_direction_10m[x.i+k],20)}<br>${compass(x.h.wind_direction_10m[x.i+k])}<div class="mute">${round(x.h.wind_speed_10m[x.i+k])}</div></div>`).join('')}</div>`:errBox('wx')||'<span class="mute">No data</span>';
+    <h3>Direction every 3 hours</h3><div class="hrs">${[0,3,6,9,12,15,18,21,24].map(k=>`<div class="hr"><b>${k===0?'Now':tm(x.h.time[x.i+k])}</b><br>${arrow(x.h.wind_direction_10m[x.i+k],20)}<br>${compass(x.h.wind_direction_10m[x.i+k])}<div class="mute">${round(x.h.wind_speed_10m[x.i+k])}</div></div>`).join('')}</div>`:errBox('wx')||'<span class="mute">No data</span>';
   let sg='';
   try{const ws=readingsOf(S.sg_ws||{}),wd=readingsOf(S.sg_wd||{});
     if(ws.vals.length&&wd.vals.length){const sp=ws.vals.reduce((a,b)=>a+b,0)/ws.vals.length*1.852,dr=circMean(wd.vals);
@@ -556,7 +567,7 @@ function renderAirBase(){
   const psiCat=v=>v<=50?['#2e9e5b','Good']:v<=100?['#e0b100','Moderate']:v<=200?['#d8403a','Unhealthy']:v<=300?['#8b3fa8','Very unhealthy']:['#6d1a2b','Hazardous'];
   $('#psiBox').innerHTML=Object.keys(psi).length?`<table><tr><th>Area</th><th>Today's air quality score</th><th>Fine dust right now</th></tr>${['national','north','south','east','west','central'].filter(k=>psi[k]!=null).map(k=>{const c=psiCat(psi[k]);return `<tr><td>${k[0].toUpperCase()+k.slice(1)}</td><td><span class="chip" style="background:${c[0]};color:${c[0]==='#e0b100'?'#222':'#fff'}">${psi[k]} · ${c[1]}</span></td><td>${pm[k]!=null?pm[k]+' (µg/m³)':'–'}</td></tr>`}).join('')}</table><div class="small mute" style="margin-top:6px">Lower is better. 0–50 Good · 51–100 Moderate · 101–200 Unhealthy · 201–300 Very unhealthy · 300+ Hazardous.</div>`:(errBox('sg_psi')||'<span class="mute">Unavailable</span>');
   // table
-  $('#aqTable').innerHTML=`<table><tr><th>City</th><th>Now</th><th>Worst in next 24 h</th><th>Fine dust</th></tr>${CITIES.map(c=>{const a=aqNow(c.id);if(!a)return '';const n=aqCat(a.v),k=aqCat(a.peak);return `<tr><td>${esc(c.name)}</td><td><span class="chip" style="background:${n.c};color:${n.t}">${round(a.v)}</span></td><td><span class="chip" style="background:${k.c};color:${k.t}">${round(a.peak)}</span></td><td>${round(a.pm,1)}</td></tr>`}).join('')}</table>`+errBox('aq');
+  $('#aqTable').innerHTML=`<table><tr><th>City</th><th>Now</th><th>Worst in next 24 hours</th><th>Fine dust</th></tr>${CITIES.map(c=>{const a=aqNow(c.id);if(!a)return '';const n=aqCat(a.v),k=aqCat(a.peak);return `<tr><td>${esc(c.name)}</td><td><span class="chip" style="background:${n.c};color:${n.t}">${round(a.v)}</span></td><td><span class="chip" style="background:${k.c};color:${k.t}">${round(a.peak)}</span></td><td>${round(a.pm,1)}</td></tr>`}).join('')}</table>`+errBox('aq');
   // narrative + charts
   const id=$('#aqCity').value||'sg',a=aqNow(id);
   if(!a){$('#aqNarr').innerHTML=errBox('aq')||'<span class="mute">No data</span>';return}
@@ -569,7 +580,7 @@ function renderAirBase(){
   $('#chAqi').innerHTML=chart({labels:lab,now:i0-aa,min:0,bands:AQ_BANDS,h:190,series:[{values:h.us_aqi.slice(aa,bb),color:'#14213d'}],max:Math.max(120,pk+10)});
   $('#chPm').innerHTML=chart({labels:lab,now:i0-aa,min:0,series:[{values:h.pm2_5.slice(aa,bb),color:'#8b3fa8'}]});
   const hz=CITIES.filter(c=>{const q=aqNow(c.id);return q&&q.peak>=151});
-  $('#airAlerts').innerHTML=hz.length?`<div class="alert red">😷 Haze watch: ${hz.map(c=>esc(c.name)).join(', ')} may reach Unhealthy levels in the next 24 h.</div>`:'';
+  $('#airAlerts').innerHTML=hz.length?`<div class="alert red">😷 Haze watch: ${hz.map(c=>esc(c.name)).join(', ')} may reach Unhealthy levels in the next 24 hours.</div>`:'';
 }
 /* ---- health ---- */
 const BASE={ // indicative long-run seasonal tendency by month (1 low … 3 high) – NOT live data
@@ -824,7 +835,7 @@ function renderAirVisual(){
       <div style="text-align:center">${gaugeSVG(a.v)}<div class="chip" style="background:${cat.c};color:${cat.t};font-size:14px;padding:4px 14px">${AQ_FACE(a.v)} ${cat.l}</div></div>
       <div style="flex:1;min-width:220px"><div class="big" style="font-size:22px">${esc(c.name.replace('📍 ',''))}</div>
        <p style="margin:6px 0">${AQ_ADVICE(a.v)}</p>
-       <div class="small mute">Fine dust now: <b>${round(a.pm,1)}</b> · Worst in the next 24 h: <b style="color:${pc.c==='#e0b100'?'#9a7a00':pc.c}">${Math.round(a.peak)} (${pc.l})</b></div>
+       <div class="small mute">Fine dust now: <b>${round(a.pm,1)}</b> · Worst in the next 24 hours: <b style="color:${pc.c==='#e0b100'?'#9a7a00':pc.c}">${Math.round(a.peak)} (${pc.l})</b></div>
        <div class="small mute" style="margin-top:6px">Next 24 hours (tap a block):</div>${aqStrip(a)}</div></div>`;
   }
   const {psi,pm,ts}=sgPsi(),keys=['north','west','central','east','south','national'];
@@ -925,18 +936,15 @@ function renderCrossings(){
     $('#crossTs').textContent='';return;
   }
   $('#crossTs').textContent=S.crossTs?'updated '+S.crossTs:'';
-  const dirs=[['to','🇸🇬 → 🇲🇾','Going to Johor Bahru'],['back','🇲🇾 → 🇸🇬','Coming back to Singapore']];
-  box.innerHTML=`<div class="g2">${dirs.map(([k,fl,title])=>{
+  const dirs=[['to','🇸🇬→🇲🇾','Singapore to Johor Bahru'],['back','🇲🇾→🇸🇬','Johor Bahru to Singapore']];
+  const fmt=m=>{m=Math.round(m);return m>=60?`${Math.floor(m/60)}<small>h</small> ${String(m%60).padStart(2,'0')}<small>m</small>`:`${m}<small>min</small>`};
+  box.innerHTML=`<div class="xdash">${dirs.map(([k,fl,title])=>{
     const rows=LINKS.filter(L=>S.cross[L.id]).map(L=>({L,v:S.cross[L.id][k]}));
-    const mx=Math.max(60,...rows.map(r=>r.v.min));let ban='';
-    if(rows.length>1){const d=Math.abs(rows[0].v.min-rows[1].v.min),b=rows[0].v.min<=rows[1].v.min?rows[0]:rows[1];ban=d<3?'<div class="alert green small">⚖️ Both links take about the same time.</div>':`<div class="alert green small">🏁 <b>${b.L.name}</b> is about <b>${Math.round(d)} min faster</b> right now.</div>`}
-    return `<div class="card" style="box-shadow:none"><h2>${fl} ${title}</h2>${ban}${rows.map(({L,v})=>{
-      const delay=Math.max(0,v.min-v.free),lv=delayLvl(delay),vals=(hist[L.id+'|'+k]||[]).filter(p=>Date.now()-p[0]<864e5).map(p=>p[1]);
-      return `<div class="xrow" data-detail="cross:${L.id}"><div class="row" style="justify-content:space-between"><b>${L.icon} ${L.name}</b><span class="chip" style="background:${lv[1]}">${lv[0]}${delay>=1?' · +'+Math.round(delay)+' min':''}</span></div>
-       <div class="row" style="align-items:baseline;gap:6px"><span class="big">${Math.round(v.min)}</span><span class="mute">min to clear</span></div>
-       <div class="bar"><i style="width:${Math.min(100,v.min/mx*100)}%;background:${lv[1]}"></i></div>
-       <div class="small mute">${Math.round(v.km)} km · no-traffic time ${Math.round(v.free)} min${vals.length>1?' · last 24 h here: '+Math.round(Math.min(...vals))+'–'+Math.round(Math.max(...vals))+' min':''}</div></div>`}).join('')}</div>`}).join('')}</div>
-   <div class="small mute" style="margin-top:6px">Drive time between the two checkpoints including the road queue; updated at most every 30 minutes. Immigration counter waiting time is not included — add 10–60+ min on busy days.</div>`;
+    const best=rows.length>1&&Math.abs(rows[0].v.min-rows[1].v.min)>=3?(rows[0].v.min<rows[1].v.min?rows[0].L.id:rows[1].L.id):'';
+    return `<div class="xpanel"><div class="xhead"><span class="fl">${fl}</span><b>${title}</b></div><div class="xtiles">${rows.map(({L,v})=>{
+      const delay=Math.max(0,v.min-v.free),lv=delayLvl(delay);
+      return `<div class="xt" style="background:${lv[1]}" data-detail="cross:${L.id}">${best===L.id?'<span class="best">🏁 Fastest</span>':''}<div class="nm">${L.icon} ${L.id==='cw'?'Woodlands':'Tuas'}</div><div class="mins">${fmt(v.min)}</div><div class="st">${lv[0]}</div></div>`}).join('')}</div></div>`}).join('')}</div>
+   <div class="small mute" style="margin-top:8px">Driving time including the queue, not including immigration counters (add 10–60+ min on busy days). Tap a box for details.</div>`;
 }
 
 /* ---------- public transport graphics ---------- */
@@ -982,7 +990,7 @@ function renderOverview(){
   else tiles.push(`<div class="card tile"><h2>🌤️ Weather</h2><span class="mute">${errBox('wx')||'Loading…'}</span></div>`);
   // air
   if(a){const cat=aqCat(a.v),pc=aqCat(a.peak);
-    tiles.push(`<div class="card tile" data-detail="air:${c.id}"><h2>🌫️ Air quality <span class="small mute">details ›</span></h2><div class="row"><span style="font-size:44px">${AQ_FACE(a.v)}</span><span class="big" style="color:${cat.c==='#e0b100'?'#9a7a00':cat.c}">${Math.round(a.v)}</span></div><div class="small" style="margin-top:4px"><span class="chip" style="background:${cat.c};color:${cat.t}">${cat.l}</span></div><div class="small mute">Worst in next 24 h: <b>${Math.round(a.peak)}</b> (${pc.l})</div></div>`)}
+    tiles.push(`<div class="card tile" data-detail="air:${c.id}"><h2>🌫️ Air quality <span class="small mute">details ›</span></h2><div class="row"><span style="font-size:44px">${AQ_FACE(a.v)}</span><span class="big" style="color:${cat.c==='#e0b100'?'#9a7a00':cat.c}">${Math.round(a.v)}</span></div><div class="small" style="margin-top:4px"><span class="chip" style="background:${cat.c};color:${cat.t}">${cat.l}</span></div><div class="small mute">Worst in next 24 hours: <b>${Math.round(a.peak)}</b> (${pc.l})</div></div>`)}
   else tiles.push(`<div class="card tile"><h2>🌫️ Air quality</h2><span class="mute">${errBox('aq')||'Loading…'}</span></div>`);
   // health
   const cc=c.cc||'SG',hm=healthModel(cc)||[],up=hm.filter(e=>e.status==='up'),anyLive=hm.some(e=>e.mode==='live'),upLive=up.filter(e=>e.mode==='live');
@@ -1009,7 +1017,7 @@ function renderAlertBar(al){
   const sig=al.map(a=>clean(a[1])).join('|');let dis=null;try{dis=JSON.parse(store.get('adis','null'))}catch(e){}
   if(!al.length||(dis&&dis.sig===sig&&Date.now()-dis.t<864e5)){bar.innerHTML='';return}
   const red=al.some(a=>a[2]==='red'),col=red?'var(--bad)':'var(--usg)',open=!!S.alertOpen;
-  bar.innerHTML=`<div class="abar" style="border-color:${col}"><div class="abar-top"><span class="abar-t">${red?'🚨':'⚠️'} <b>${al.length} alert${al.length>1?'s':''}</b> in the last 24 h${open?'':' · '+esc(clean(al[0][1]).slice(0,70))+(clean(al[0][1]).length>70?'…':'')}</span><button class="abtn" id="abToggle">${open?'Hide':'View'}</button><button class="abtn" id="abX" title="Dismiss for today" aria-label="Dismiss">✕</button></div>${open?`<div class="abar-list">${al.map(a=>`<div>${a[0]} ${a[1]}</div>`).join('')}</div>`:''}</div>`;
+  bar.innerHTML=`<div class="abar" style="border-color:${col}"><div class="abar-top"><span class="abar-t">${red?'🚨':'⚠️'} <b>${al.length} alert${al.length>1?'s':''}</b> in the last 24 hours${open?'':' · '+esc(clean(al[0][1]).slice(0,70))+(clean(al[0][1]).length>70?'…':'')}</span><button class="abtn" id="abToggle">${open?'Hide':'View'}</button><button class="abtn" id="abX" title="Dismiss for today" aria-label="Dismiss">✕</button></div>${open?`<div class="abar-list">${al.map(a=>`<div>${a[0]} ${a[1]}</div>`).join('')}</div>`:''}</div>`;
   $('#abToggle').onclick=()=>{S.alertOpen=!S.alertOpen;renderAlertBar(al)};
   $('#abX').onclick=()=>{store.set('adis',JSON.stringify({sig,t:Date.now()}));renderAlertBar(al)};
 }
@@ -1081,6 +1089,9 @@ $('#ovSel').onchange=e=>{S.userPicked=true;S.sel=e.target.value;store.set('city'
 $('#aqHeroSel').onchange=e=>{S.aqPicked=true;$('#aqCity').value=e.target.value;renderAir()};
 $('#aqCity').addEventListener('change',()=>{S.aqPicked=true});
 
+/* Settings button is hidden from visitors. Open the page once with ?admin=1 to show it on your own browser; ?admin=0 hides it again. */
+try{const q=new URLSearchParams(location.search).get('admin');if(q==='1')store.set('admin','1');if(q==='0')store.set('admin','');}catch(e){}
+if(!store.get('admin')){const b=document.getElementById('btnSet');if(b)b.style.display='none';}
 renderAll();refresh();locate();
 </script>
 </body>
