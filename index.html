@@ -599,9 +599,9 @@ async function dgsRows(id){
   return dgsCSV(id);
 }
 const DISEASES=[
- {k:'dengue',label:'Dengue',re:/dengue/i,icon:'🦟'},
  {k:'flu',label:'Influenza / flu-like (ARI)',re:/influenza|upper respiratory|\bari\b|\bili\b/i,icon:'🤧'},
  {k:'hfmd',label:'Hand, foot & mouth (HFMD)',re:/hand.{0,3}foot|hfmd/i,icon:'🧒'},
+ {k:'dengue',label:'Dengue',re:/dengue/i,icon:'🦟'},
  {k:'conj',label:'Conjunctivitis (sore eyes)',re:/conjunctivitis/i,icon:'👁️'},
  {k:'diar',label:'Acute diarrhoea',re:/diarrh/i,icon:'🤢'}
 ];
@@ -1346,7 +1346,7 @@ let _lastNewsKey='';
 function ovNewsTick(){const k=S.sel+'|'+S.newsMode;if(k!==_lastNewsKey){_lastNewsKey=k;loadOvNews().then(renderOvNews)}}
 
 /* ---------- version + feedback ---------- */
-const APP_VERSION='2.8.4',APP_DATE='16 Nov 2026';
+const APP_VERSION='2.8.5',APP_DATE='16 Nov 2026';
 /* Feedback goes to the owner's inbox through Web3Forms (free). Get a key at web3forms.com (enter the inbox address, the key is emailed) and paste it here. */
 const FEEDBACK_KEY='97dcfb7d-dcdd-4d49-8fbd-38102dbaff77';
 $('#verTag').textContent='v'+APP_VERSION;
