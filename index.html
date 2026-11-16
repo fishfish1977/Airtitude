@@ -64,6 +64,30 @@ dialog{border:0;border-radius:16px;padding:18px;max-width:520px;width:92%}dialog
 footer{color:var(--mute);font-size:12px;padding:10px 14px;max-width:1100px;margin:0 auto}
 .wl{list-style:none;padding:0;margin:0}.wl li{padding:6px 0;border-bottom:1px solid var(--line)}
 @media(max-width:600px){#map{height:360px}.big{font-size:28px}}
+
+.tiles{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+.tile,.xrow,.hcard,[data-detail]{cursor:pointer}
+.tile{transition:transform .1s,box-shadow .1s}.tile:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(10,35,66,.12)}
+#dlg2{max-width:640px;max-height:88vh;overflow:auto}
+.seg{display:inline-flex;background:#e6ebf5;border-radius:12px;padding:3px}.seg button{border:0;background:none;padding:7px 16px;border-radius:10px;font-weight:700;color:var(--navy);cursor:pointer}.seg button.on{background:#fff;box-shadow:0 1px 4px rgba(10,35,66,.18)}
+.hbanner{display:flex;gap:10px;align-items:center;border-left:5px solid;border-radius:10px;padding:8px 10px;margin:6px 0}.hb-t{font-weight:800;font-size:16px}
+.hnums{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0}.hnums>div{background:#f3f5f9;border-radius:10px;padding:6px 8px;text-align:center}.hnums span{display:block;font-size:11px;color:var(--mute);font-weight:700}.hnums b{font-size:20px}.hnums i{display:block;font-size:11px;color:var(--mute);font-style:normal}
+.hnums .pk b{color:#d8403a}.hnums .tr b{color:#2e9e5b}
+.xrow{border:1px solid var(--line);border-radius:12px;padding:10px;margin:8px 0}.xrow:hover{background:#f7f9fd}
+.bar{height:8px;background:#e6ebf5;border-radius:6px;overflow:hidden;margin:6px 0}.bar i{display:block;height:100%;border-radius:6px}
+.aqstrip{display:flex;gap:3px;overflow-x:auto;padding:4px 0}.aqc{min-width:38px;border-radius:8px;text-align:center;padding:4px 2px;font-size:12px;cursor:pointer}.aqc b{display:block}.aqc span{font-size:10px;opacity:.85}
+.airhero{background:linear-gradient(180deg,#eef6ff,#fff)}
+.sgmap{display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-areas:". n ." "w c e" ". s .";gap:8px;max-width:340px;margin:0 auto 6px}
+.sgt{border-radius:16px;text-align:center;padding:10px 4px;cursor:pointer}.sgt b{display:block;font-size:24px}.sgt span{font-size:12px;font-weight:700}
+.sg-north{grid-area:n}.sg-west{grid-area:w}.sg-central{grid-area:c}.sg-east{grid-area:e}.sg-south{grid-area:s}
+.trhero{display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,#eef4ff,#fff);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:10px;flex-wrap:wrap}
+.lines{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px;margin-bottom:10px}
+.ln{display:flex;gap:10px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px 10px;cursor:pointer}.ln.bad{border-color:var(--bad);background:#fff0ef}.ln:hover{background:#f7f9fd}
+.lb{display:inline-block;min-width:42px;text-align:center;color:#fff;font-weight:800;font-size:12px;border-radius:8px;padding:4px 6px}
+.abar{background:#fffaf2;border:1px solid var(--line);border-left:5px solid var(--usg);border-radius:10px;padding:6px 10px;margin:0 0 10px;font-size:13px}
+.abar-top{display:flex;align-items:center;gap:8px}.abar-t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.abtn{border:0;background:#eef2fb;color:var(--navy);border-radius:8px;padding:3px 9px;cursor:pointer;font-weight:700;font-size:12px}.abtn:hover{background:#dfe6f5}
+.abar-list{margin-top:6px;border-top:1px solid var(--line);padding-top:6px}.abar-list>div{padding:3px 0}
 </style>
 </head>
 <body>
@@ -85,8 +109,11 @@ footer{color:var(--mute);font-size:12px;padding:10px 14px;max-width:1100px;margi
 </header>
 
 <main>
+<div id="alertBar"></div>
 <section class="tab on" id="t-overview">
- <div id="alerts"></div>
+ <div class="row" style="margin-bottom:10px"><b>Showing for</b><select id="ovSel"></select><span class="small mute" id="ovHint"></span></div>
+ <div class="grid tiles" id="ovTiles"></div>
+ <h3 style="margin-top:16px">Other places · tap to switch</h3>
  <div class="grid" id="cityCards"></div>
 </section>
 
@@ -135,6 +162,9 @@ footer{color:var(--mute);font-size:12px;padding:10px 14px;max-width:1100px;margi
 
 <section class="tab" id="t-air">
  <div id="airAlerts"></div>
+ <div class="card airhero"><h2>Air quality <select id="aqHeroSel"></select></h2><div id="aqHero"></div></div>
+ <div class="card" style="margin-top:12px"><h2>Singapore today · official readings</h2><div id="psiTiles"></div></div>
+ <div style="height:12px"></div>
  <div class="alert blue small">How to read this: the air quality score goes from 0 (clean) upwards – <b>lower is better</b>. “Fine dust” (PM2.5) is the tiny smoke and haze particles that can reach deep into your lungs.</div>
  <div class="g2">
   <div class="card"><h2>Singapore · official air quality <span class="small mute" id="psiTs"></span></h2><div id="psiBox"></div></div>
@@ -202,9 +232,11 @@ footer{color:var(--mute);font-size:12px;padding:10px 14px;max-width:1100px;margi
 </main>
 <footer>Data: NEA, LTA, MOH/CDA via data.gov.sg (Singapore Open Data Licence) · MET Malaysia via data.gov.my · Open-Meteo (weather and air-quality forecasts) · Map © OpenStreetMap contributors © CARTO. Information only — not an official warning service.</footer>
 
+<dialog id="dlg2"><div id="dlg2Body"></div><div class="row" style="justify-content:flex-end;margin-top:12px"><button class="btn2 alt" id="dlg2Close">Close</button></div></dialog>
+
 <dialog id="dlg"><h2 style="margin-top:0">Settings</h2>
  <label class="fld"><span>LTA DataMall AccountKey (free at datamall.lta.gov.sg) – unlocks incidents, expressway times, MRT alerts</span><input type="password" id="sKey" autocomplete="off"></label>
- <label class="fld"><span>Proxy URL (Cloudflare Worker – needed for LTA in a browser; see proxy-worker.js)</span><input type="text" id="sProxy" placeholder="https://your-worker.workers.dev"></label>
+ <label class="fld"><span>Proxy URL (optional – a built-in Cloudflare Worker is used if left blank)</span><input type="text" id="sProxy" placeholder="https://your-worker.workers.dev"></label>
  <label class="fld"><span>Google Maps API key with “Routes API” enabled – gives live drive times to JB and back on both links</span><input type="password" id="sG" autocomplete="off"></label>
  <label class="fld"><span>data.gov.sg API key (optional, higher rate limits)</span><input type="password" id="sDgs" autocomplete="off"></label>
  <div class="row" style="justify-content:flex-end;margin-top:12px"><button class="btn2 alt" id="sCancel">Cancel</button><button class="btn2" id="sSave">Save &amp; reload</button></div>
@@ -217,6 +249,8 @@ footer{color:var(--mute);font-size:12px;padding:10px 14px;max-width:1100px;margi
 const TZ='Asia/Singapore';
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const DEFAULT_PROXY='https://airtitude.andrewchanpohseng.workers.dev'; // built-in Cloudflare Worker for LTA traffic/MRT data; override in Settings
+const proxyUrl=()=>(store.get('proxy')||DEFAULT_PROXY).replace(/\/+$/,'');
 const store={get(k,d=''){try{const v=localStorage.getItem('sgmy.'+k);return v==null?d:v}catch(e){return d}},set(k,v){try{localStorage.setItem('sgmy.'+k,v)}catch(e){}}};
 const enc=encodeURIComponent;
 const withTimeout=(p,ms)=>Promise.race([p,new Promise((_,rej)=>setTimeout(()=>rej(new Error('Timed out')),ms))]);
@@ -239,7 +273,7 @@ async function sgGet(path){
   }
 }
 async function ltaGet(path){
-  const proxy=store.get('proxy').replace(/\/$/,''),key=store.get('lta');
+  const proxy=proxyUrl(),key=store.get('lta');
   if(!proxy&&!key)throw new Error('NOKEY');
   const url=proxy?proxy+'/lta/'+path:'https://datamall2.mytransport.sg/ltaodataservice/'+path;
   return getJSON(url,{headers:key?{AccountKey:key,accept:'application/json'}:undefined});
@@ -371,9 +405,9 @@ async function loadTransit(){
     const a=await ltaGet('TrainServiceAlerts');S.train=a.value||a;delete S.errors.train;
   }catch(e){S.train=null;S.errors.train=e.message}
   try{
-    const q='(MRT OR LRT OR SMRT OR "SBS Transit") (breakdown OR disruption OR delay OR fault) Singapore when:3d';
+    const q='(MRT OR LRT OR SMRT OR "SBS Transit" OR "bus service") (breakdown OR disruption OR delay OR fault) Singapore when:3d';
     const rss='https://news.google.com/rss/search?q='+enc(q)+'&hl=en-SG&gl=SG&ceid=SG:en';
-    const proxy=store.get('proxy').replace(/\/$/,'');let items=[];
+    const proxy=proxyUrl();let items=[];
     if(proxy){
       const x=new DOMParser().parseFromString(await getText(proxy+'/rss?url='+enc(rss)),'text/xml');
       items=[...x.querySelectorAll('item')].map(i=>({title:i.querySelector('title')?.textContent,link:i.querySelector('link')?.textContent,pubDate:i.querySelector('pubDate')?.textContent}));
@@ -419,7 +453,7 @@ const DISEASES=[
  {k:'diar',label:'Acute diarrhoea',re:/diarrh/i,icon:'🤢'}
 ];
 async function loadHealth(){
-  S.health={};
+  const got={};S.health=S.health||{};
   const sets=[['d_ca168b2cb763640d72c4600a68f9909e','cases'],['d_5d5508f1c954f5630d7b3aa7875d01f9','attend']];
   for(const [id,kind] of sets){
     try{
@@ -434,13 +468,14 @@ async function loadHealth(){
         const key=r[id_];(byD[key]=byD[key]||{});const wk=+m[1]*100+ +m[2];byD[key][wk]=(byD[key][wk]||0)+v;
       });
       DISEASES.forEach(d=>{
-        const names=Object.keys(byD).filter(n=>d.re.test(n));if(!names.length||S.health[d.k])return;
+        const names=Object.keys(byD).filter(n=>d.re.test(n));if(!names.length||got[d.k])return;
         const tot={};names.forEach(n=>Object.entries(byD[n]).forEach(([w,v])=>tot[w]=(tot[w]||0)+v));
-        const wks=Object.keys(tot).map(Number).sort((a,b)=>a-b);S.health[d.k]={weeks:wks,vals:wks.map(w=>tot[w]),kind,src:id};
+        const wks=Object.keys(tot).map(Number).sort((a,b)=>a-b);S.health[d.k]={weeks:wks,vals:wks.map(w=>tot[w]),kind,src:id};got[d.k]=1;
       });
       delete S.errors.health;
     }catch(e){fail('health',e)}
   }
+  S.healthChecked=Date.now();
 }
 /* ============================ rendering ============================ */
 function curOf(id){
@@ -451,25 +486,6 @@ function aqNow(id){
   const v=(a.current&&a.current.us_aqi!=null)?a.current.us_aqi:a.hourly.us_aqi[i];
   const nxt=a.hourly.us_aqi.slice(i,i+25).filter(x=>x!=null);
   return{v,i,peak:nxt.length?Math.max(...nxt):null,pm:a.current&&a.current.pm2_5!=null?a.current.pm2_5:a.hourly.pm2_5[i],a};
-}
-function renderOverview(){
-  const al=[];
-  const sgWarn=(S.sg_two&&S.sg_two.items&&S.sg_two.items[0]&&S.sg_two.items[0].forecasts||[]).filter(f=>/thunder/i.test(f.forecast));
-  if(sgWarn.length)al.push(['⛈️',`NEA 2-hour forecast: thunderstorms expected in ${sgWarn.slice(0,6).map(f=>esc(f.area)).join(', ')}${sgWarn.length>6?' +'+(sgWarn.length-6)+' more':''}.`,'']);
-  (S.myWarn||[]).filter(w=>!w.valid_to||new Date(w.valid_to.replace(' ','T')+'+08:00')>new Date()).slice(0,3).forEach(w=>al.push(['⚠️',`MET Malaysia: ${esc((w.warning_issue&&(w.warning_issue.title_en||w.warning_issue.title_bm))||w.heading_en||'Weather warning')}${w.text_en?' – '+esc(String(w.text_en).slice(0,160)):''}`,'']));
-  CITIES.forEach(c=>{const a=aqNow(c.id);if(a&&a.peak>=151)al.push(['😷',`${esc(c.name)}: air quality forecast to reach <b>${aqCat(a.peak).l}</b> (score ${Math.round(a.peak)}) in the next 24 hours.`,'red']);else if(a&&a.peak>=101)al.push(['😷',`${esc(c.name)}: air quality may reach <b>poor for sensitive people</b> (score ${Math.round(a.peak)}).`,''])});
-  ['sg','kl','jb'].forEach(id=>{const c=curOf(id);if(!c)return;const o=windOutlook(c.h,c.i);const s=o.find(x=>x.k==='shift'||x.k==='gust');if(s)al.push(['🌬️',`${esc(CITIES.find(x=>x.id===id).name)}: ${s.text}`,'blue'])});
-  if(Array.isArray(S.train&&S.train.AffectedSegments)&&S.train.AffectedSegments.length)al.push(['🚇','MRT/LRT service disruption reported – see Public Transport tab.','red']);
-  if(S.healthSignals)S.healthSignals.forEach(s=>al.push(['🦠',s,'']));
-  $('#alerts').innerHTML=al.length?al.map(a=>`<div class="alert ${a[2]}">${a[0]} ${a[1]}</div>`).join(''):'<div class="alert green">✅ No active weather, air, transport or health alerts detected from the feeds that loaded.</div>';
-  $('#cityCards').innerHTML=CITIES.map(c=>{
-    const x=curOf(c.id),a=aqNow(c.id);if(!x)return `<div class="card city"><h2>${esc(c.name)}</h2><span class="mute">No data</span></div>`;
-    const [ic,tx]=WMO(x.c.weather_code),p3=Math.max(...x.h.precipitation_probability.slice(x.i,x.i+4).filter(v=>v!=null),0),cat=aqCat(a&&a.v);
-    return `<div class="card city ${c.id===S.sel?'sel':''}" data-id="${c.id}"><h2>${esc(c.name)} <span class="chip" style="background:${cat.c};color:${cat.t}">Air ${a&&a.v!=null?Math.round(a.v):'–'}</span></h2>
-     <div class="row"><span style="font-size:34px">${ic}</span><span class="big">${round(x.c.temperature_2m)}°</span><span class="sp"></span><div class="small">${esc(tx)}<br>Feels ${round(x.c.apparent_temperature)}° · 💧${round(x.c.relative_humidity_2m)}%</div></div>
-     <div class="small mute" style="margin-top:6px">Rain next 3 h: <b>${round(p3)}%</b> · Wind ${arrow(x.c.wind_direction_10m,16)} ${compass(x.c.wind_direction_10m)} ${round(x.c.wind_speed_10m)} km/h</div></div>`;
-  }).join('')+errBox('wx')+errBox('aq');
-  $$('#cityCards .city[data-id]').forEach(e=>e.onclick=()=>{S.userPicked=true;S.sel=e.dataset.id;store.set('city',S.sel);$('#citySel').value=S.sel;renderAll();go('weather')});
 }
 function windOutlook(h,i0){
   const out=[],n=Math.min(i0+25,h.time.length),d0=h.wind_direction_10m[i0],s0=h.wind_speed_10m[i0];
@@ -531,7 +547,7 @@ function renderWind(){
   }catch(e){}
   $('#sgWind').innerHTML=sg||(errBox('sg_ws')||'<span class="mute">Live stations unavailable.</span>');
 }
-function renderAir(){
+function renderAirBase(){
   // SG official
   const p=S.sg_psi&&((S.sg_psi.items&&S.sg_psi.items[0])||S.sg_psi),r=p&&p.readings||{};
   const psi=r.psi_twenty_four_hourly||{};let pm=r.pm25_one_hourly||{};
@@ -599,42 +615,6 @@ function seasonUI(curve,liveLevel){
   return {level:L,trend,html:`<div class="row"><span class="chip" style="background:${L[1]}">${L[0]} activity</span><span class="chip" style="background:${trend[2]}">${trend[0]} ${trend[1]}</span></div>${gauge}${svg}<div class="small">${trend[3]}. Usually peaks around <b>${pkTxt}</b>.</div>`};
 }
 const SGT_MONTH=()=>(+new Date().toLocaleString('en-US',{timeZone:TZ,month:'numeric'}))-1;
-function renderHealth(){
-  S.healthSignals=[];const live=S.health||{};let hidden=0;const cards=[],glance=[];
-  DISEASES.forEach(d=>{
-    const L=live[d.k];let liveInfo=null,pct=0,stale=true;
-    if(L&&L.vals.length>8){
-      const v=L.vals,n=v.length,last4=v.slice(-4).reduce((a,b)=>a+b,0)/4,prev4=v.slice(-8,-4).reduce((a,b)=>a+b,0)/4;
-      pct=prev4?((last4-prev4)/prev4)*100:0;
-      const lw=L.weeks[n-1],yr=Math.floor(lw/100),wk=lw%100,curYr=+todaySG().slice(0,4);
-      stale=(curYr-yr)*52+((new Date(todaySG())-new Date(yr+'-01-01'))/6048e5-wk)>12;
-      let pkAvg=0;for(let i=3;i<n;i++){const a=(v[i]+v[i-1]+v[i-2]+v[i-3])/4;if(a>pkAvg)pkAvg=a}
-      liveInfo={v,n,last4,prev4,pkAvg,lw,yr,wk,pctOfPeak:pkAvg?last4/pkAvg*100:null};
-    }
-    if(d.k==='conj'||d.k==='diar'){const surge=liveInfo&&!stale&&pct>=30;if(!surge){hidden++;return}}
-    let sgHTML,sgSum;
-    if(liveInfo){
-      const ui=seasonUI(liveCurve(L),stale?null:liveInfo.pctOfPeak);
-      const arrowT=pct>15?`<span class="chip" style="background:#d8403a">▲ ${Math.round(pct)}% vs last month</span>`:pct<-15?`<span class="chip" style="background:#2e9e5b">▼ ${Math.round(-pct)}% vs last month</span>`:`<span class="chip" style="background:#5b667a">● Flat vs last month</span>`;
-      sgHTML=ui.html+(stale?`<div class="alert small">⚠️ The open data only runs to ${liveInfo.yr}-W${liveInfo.wk} — shown for seasonal pattern. Check the CDA bulletin for this week.</div>`:`<div class="row small" style="margin-top:6px">${arrowT}<span>Now ${Math.round(liveInfo.last4)}/wk · usual peak ${Math.round(liveInfo.pkAvg)}/wk (${Math.round(liveInfo.pctOfPeak)}% of peak)</span></div>`);
-      sgSum=stale?ui:Object.assign({},ui);
-      if(!stale&&pct>15)S.healthSignals.push(`Singapore: ${d.label} cases rising (+${Math.round(pct)}% vs the previous 4 weeks).`);
-    }else if(BASE.SG[d.k]){const ui=seasonUI(baseCurve(BASE.SG[d.k]));sgHTML=ui.html+'<div class="small mute">Typical seasonal pattern (live weekly feed not available).</div>';sgSum=ui}
-    else return;
-    const my=BASE.MY[d.k]?seasonUI(baseCurve(BASE.MY[d.k])):null;
-    glance.push(`<div class="card" style="padding:10px"><b>${d.icon} ${d.label.split(' (')[0].split(' /')[0]}</b><div class="small mute">🇸🇬 <span style="color:${sgSum.level[1]};font-weight:700">${sgSum.level[0]}</span> · ${sgSum.trend[0]} ${sgSum.trend[1]}</div>${my?`<div class="small mute">🇲🇾 <span style="color:${my.level[1]};font-weight:700">${my.level[0]}</span> · ${my.trend[0]} ${my.trend[1]}</div>`:''}</div>`);
-    cards.push(`<div class="card"><h2>${d.icon} ${d.label}</h2><h3>🇸🇬 Singapore</h3>${sgHTML}${my?`<h3>🇲🇾 Malaysia · typical pattern</h3>${my.html}`:''}</div>`);
-  });
-  let html=`<h3 style="margin:4px 0">At a glance</h3><div class="grid" style="margin-bottom:12px">${glance.join('')}</div><div class="g2">${cards.join('')}`;
-  const worst=CITIES.map(c=>({c,a:aqNow(c.id)})).filter(x=>x.a).sort((a,b)=>b.a.peak-a.a.peak)[0];
-  if(worst&&worst.a.peak>=101)html+=`<div class="card"><h2>😷 Air-quality related breathing issues</h2><div>${esc(worst.c.name)} worst forecast air quality score <b>${round(worst.a.peak)}</b> – expect more coughs, asthma flare-ups and eye irritation while air quality is poor.</div></div>`;
-  html+='</div>';
-  html+=`<div class="small mute" style="margin-top:8px"><b>How to read:</b> the blue curve is the usual pattern over a year, the red dot is the usual peak, and the black dot is where we are today. The coloured bar shows how busy it is now (green quiet → red usual peak). “Climbing” means the next 2 months are usually higher than now.</div>`;
-  if(S.errors.health)html+='<div class="small mute" style="margin-top:6px">ℹ️ Live Singapore weekly case data could not be reached from this browser, so typical seasonal patterns are shown. Press Refresh to retry.</div>';
-  if(hidden)html+='<div class="small mute" style="margin-top:6px">Minor illnesses (sore eyes, diarrhoea) are hidden unless a surge is detected.</div>';
-  html+='<div class="small mute" style="margin-top:6px">Malaysia does not publish weekly flu/HFMD counts as an open API; its curves are a general guide, not measured data.</div>';
-  $('#healthBox').innerHTML=html;
-}
 
 /* ============ crossings: time to JB and back, both links ============ */
 const LINKS=[
@@ -643,17 +623,26 @@ const LINKS=[
 ];
 const gmapsDir=(o,d)=>'https://www.google.com/maps/dir/?api=1&origin='+enc(o)+'&destination='+enc(d)+'&travelmode=driving';
 async function gRoute(o,d){
-  const r=await withTimeout(fetch('https://routes.googleapis.com/directions/v2:computeRoutes',{method:'POST',
-    headers:{'Content-Type':'application/json','X-Goog-Api-Key':store.get('gkey'),'X-Goog-FieldMask':'routes.duration,routes.staticDuration,routes.distanceMeters'},
-    body:JSON.stringify({origin:{address:o},destination:{address:d},travelMode:'DRIVE',routingPreference:'TRAFFIC_AWARE'})}),20000);
+  const proxy=proxyUrl(),key=store.get('gkey'),sec=v=>v?parseFloat(String(v).replace('s','')):NaN;
+  let r;
+  if(key){
+    r=await withTimeout(fetch('https://routes.googleapis.com/directions/v2:computeRoutes',{method:'POST',
+      headers:{'Content-Type':'application/json','X-Goog-Api-Key':key,'X-Goog-FieldMask':'routes.duration,routes.staticDuration,routes.distanceMeters'},
+      body:JSON.stringify({origin:{address:o},destination:{address:d},travelMode:'DRIVE',routingPreference:'TRAFFIC_AWARE'})}),20000);
+  }else{
+    r=await withTimeout(fetch(proxy+'/routes?o='+enc(o)+'&d='+enc(d)),20000);
+    if(r.status===401||r.status===403||r.status===404||!/json/i.test(r.headers.get('content-type')||''))throw new Error('NOKEY');
+  }
   if(!r.ok){let m='HTTP '+r.status;try{const j=await r.json();m=(j.error&&j.error.message)||m}catch(e){}throw new Error(m)}
   const j=await r.json(),x=j.routes&&j.routes[0];if(!x)throw new Error('No route');
-  const sec=v=>v?parseFloat(String(v).replace('s','')):NaN;
   return{min:sec(x.duration)/60,free:sec(x.staticDuration)/60,km:(x.distanceMeters||0)/1000};
 }
+const XCACHE_MIN=30; // each lookup is a paid Google call, so reuse results for 30 min
 async function loadCrossings(){
   S.cross={};
-  if(!store.get('gkey')){S.errors.cross='NOKEY';return}
+  if(!store.get('gkey')&&!proxyUrl()){S.errors.cross='NOKEY';return}
+  try{const c=JSON.parse(store.get('xcache','null'));
+    if(c&&Date.now()-c.t<XCACHE_MIN*6e4&&c.cross&&Object.keys(c.cross).length){S.cross=c.cross;S.crossTs=c.ts;delete S.errors.cross;return}}catch(e){}
   const hist=JSON.parse(store.get('xhist','{}'));
   try{
     await Promise.all(LINKS.map(async L=>{
@@ -662,36 +651,10 @@ async function loadCrossings(){
       [['to',to],['back',back]].forEach(([k,v])=>{const key=L.id+'|'+k;(hist[key]=hist[key]||[]).push([Date.now(),v.min,v.free]);if(hist[key].length>600)hist[key].shift()});
     }));
     S.crossTs=new Date().toLocaleTimeString('en-SG',{timeZone:TZ,hour:'2-digit',minute:'2-digit'});
-    store.set('xhist',JSON.stringify(hist));delete S.errors.cross;
-  }catch(e){fail('cross',e)}
+    store.set('xhist',JSON.stringify(hist));store.set('xcache',JSON.stringify({t:Date.now(),ts:S.crossTs,cross:S.cross}));delete S.errors.cross;
+  }catch(e){if(e&&e.message==='NOKEY'){S.errors.cross='NOKEY';S.cross={}}else fail('cross',e)}
 }
 const delayLvl=d=>d<5?['Smooth','#2e9e5b']:d<15?['Busy','#e08a00']:['Heavy jam','#d8403a'];
-function renderCrossings(){
-  const box=$('#crossBox');if(!box)return;
-  const hist=JSON.parse(store.get('xhist','{}'));
-  if(S.errors.cross==='NOKEY'||!Object.keys(S.cross||{}).length){
-    box.innerHTML=(S.errors.cross&&S.errors.cross!=='NOKEY'?errBox('cross'):'<div class="alert blue small">Add a <b>Google Maps API key</b> (Routes API enabled) in ⚙ Settings to see live drive times to JB and back on both links. Until then, tap a button to see the live time in Google Maps.</div>')+
-     `<div class="g2">${LINKS.map(L=>`<div class="card" style="box-shadow:none"><b>${L.icon} ${L.name}</b><div class="row" style="margin-top:8px"><a class="btn2" target="_blank" rel="noopener" href="${gmapsDir(L.sg,L.my)}">SG → JB ↗</a><a class="btn2 alt" target="_blank" rel="noopener" href="${gmapsDir(L.my,L.sg)}">JB → SG ↗</a></div></div>`).join('')}</div>`;
-    $('#crossTs').textContent='';return;
-  }
-  const rt=L=>S.cross[L.id]?S.cross[L.id].to.min+S.cross[L.id].back.min:Infinity;
-  const ok=LINKS.filter(L=>S.cross[L.id]);let best='';
-  if(ok.length===2){const a=ok[0],b=ok[1],da=rt(a),db=rt(b),f=da<=db?a:b,sl=da<=db?b:a,diff=Math.abs(da-db);
-    best=diff<3?`<div class="alert green">⚖️ Both links are similar right now (round trip ${Math.round(Math.min(da,db))}–${Math.round(Math.max(da,db))} min).</div>`:`<div class="alert green">🏁 <b>${f.name}</b> is about <b>${Math.round(diff)} min faster</b> for a round trip right now (${Math.round(rt(f))} vs ${Math.round(rt(sl))} min).</div>`}
-  $('#crossTs').textContent=S.crossTs?'updated '+S.crossTs:'';
-  const dir=(L,k,label)=>{
-    const v=S.cross[L.id][k],delay=Math.max(0,v.min-v.free),lv=delayLvl(delay),h=(hist[L.id+'|'+k]||[]).filter(p=>Date.now()-p[0]<864e5),vals=h.map(p=>p[1]);
-    const lo=vals.length?Math.min(...vals):null,hi=vals.length?Math.max(...vals):null;
-    return `<div style="flex:1;min-width:130px"><div class="small mute">${label}</div><div class="big">${Math.round(v.min)}<span class="small"> min</span></div>
-      <span class="chip" style="background:${lv[1]}">${lv[0]}${delay>=1?' · +'+Math.round(delay)+' min':''}</span>
-      <div class="small mute" style="margin-top:4px">${Math.round(v.km)} km · no-traffic ${Math.round(v.free)} min</div>
-      ${vals.length>1?spark(vals,130,28)+`<div class="small mute">Last 24 h on this device: ${Math.round(lo)}–${Math.round(hi)} min</div>`:'<div class="small mute">Trend builds as you reopen the app</div>'}</div>`};
-  box.innerHTML=best+`<div class="g2">${LINKS.map(L=>{const c=S.cross[L.id];if(!c)return `<div class="card" style="box-shadow:none"><b>${L.icon} ${L.name}</b><div class="mute">No data</div></div>`;
-    return `<div class="card" style="box-shadow:none"><h2>${L.icon} ${L.name}<span class="chip" style="background:#14213d">Round trip ${Math.round(c.to.min+c.back.min)} min</span></h2>
-      <div class="row" style="align-items:flex-start;gap:16px">${dir(L,'to','🇸🇬 → 🇲🇾 Going to JB')}${dir(L,'back','🇲🇾 → 🇸🇬 Coming back')}</div>
-      <div class="row small" style="margin-top:6px"><a target="_blank" rel="noopener" href="${gmapsDir(L.sg,L.my)}">Open in Google Maps ↗</a></div></div>`}).join('')}</div>
-   <div class="small mute" style="margin-top:6px">Drive time between the two checkpoints including the queue building on the road. Immigration counter waiting time is not included — add 10–60+ min on busy days.</div>`;
-}
 /* ---- traffic ---- */
 function trendSVG(pts){if(pts.length<2)return '<span class="mute small">Collecting… open the app a few times to build a trend.</span>';const vals=pts.map(p=>p[1]);return chart({labels:pts.map(p=>new Date(p[0]).toLocaleString('sv-SE',{timeZone:TZ}).slice(0,16).replace(' ','T')),series:[{values:vals,color:'#d8403a'}],h:110,min:0})}
 function renderTraffic(){
@@ -703,14 +666,6 @@ function renderTraffic(){
   $('#trendBox').innerHTML=keys.length?keys.map(k=>{const [n,d,s]=k.split('|');return `<div class="small"><b>${esc(n)}</b> from ${esc(s)} · minutes</div>${trendSVG(hist[k])}`}).join(''):'<span class="mute small">Needs the LTA key — each reading is stored on this device to draw a trend.</span>';
   const jam=(S.ett||[]).filter(r=>/BKE/i.test(r.Name)&&+r.EstTime>=18).length;
   $('#trAlerts').innerHTML=(S.incidents&&S.incidents.length)?`<div class="alert red">🚧 ${S.incidents.length} incident(s) reported near the checkpoints.</div>`:jam?'<div class="alert">🐢 BKE (Woodlands approach) travel times look elevated – expect delays towards the Causeway.</div>':'';
-}
-function renderTransit(){
-  let t='';
-  if(S.errors.train==='NOKEY')t='<div class="alert blue small">Add your LTA key + proxy in ⚙ Settings for live MRT/LRT service alerts. Disruption news below works without it.</div>';
-  else if(S.train){const segs=S.train.AffectedSegments||[];t=segs.length?segs.map(s=>`<div class="alert red">🚇 <b>${esc(s.Line)}</b> ${esc(s.Direction||'')} – ${esc(s.Stations||'')}${s.FreePublicBus?'<br>Free bus: '+esc(s.FreePublicBus):''}${s.FreeMRTShuttle?'<br>Free MRT shuttle: '+esc(s.FreeMRTShuttle):''}</div>`).join('')+((S.train.Message||[]).map(m=>`<div class="small mute">${esc(m.Content)}</div>`).join('')):'<div class="alert green">✅ Normal train service on all lines (LTA).</div>'}
-  else t=errBox('train');
-  $('#trainBox').innerHTML=t;
-  $('#newsBox').innerHTML=S.news?(S.news.length?`<ul class="wl">${S.news.map(n=>`<li><a href="${esc(n.link)}" target="_blank" rel="noopener">${esc(n.title)}</a><div class="small mute">${esc(n.pubDate||'')}</div></li>`).join('')}</ul>`:'<div class="alert green">No MRT/LRT disruption headlines in the last 3 days.</div>'):(errBox('news')||'<span class="mute">News unavailable.</span>');
 }
 function renderAll(){
   const safe=f=>{try{f()}catch(e){console.error(f.name,e)}};
@@ -785,8 +740,8 @@ function go(t){$$('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.t=
 $('#nav').onclick=e=>{const b=e.target.closest('button');if(b)go(b.dataset.t)};
 function buildOptions(){
   const o=CITIES.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');
-  ['#citySel','#windCity','#aqCity'].forEach(sel=>{const el=$(sel),v=el.value;el.innerHTML=o;el.value=CITIES.some(c=>c.id===v)?v:CITIES[0].id});
-  $('#citySel').value=S.sel;
+  ['#citySel','#windCity','#aqCity','#ovSel','#aqHeroSel'].forEach(sel=>{const el=$(sel),v=el.value;el.innerHTML=o;el.value=CITIES.some(c=>c.id===v)?v:CITIES[0].id});
+  $('#citySel').value=S.sel;$('#ovSel').value=S.sel;
 }
 buildOptions();
 $('#citySel').onchange=e=>{S.userPicked=true;S.sel=e.target.value;store.set('city',S.sel);renderAll()};
@@ -801,7 +756,7 @@ $('#gGo').onclick=()=>{const f=$('#gFrom').value.trim(),t=$('#gTo').value.trim()
   const sg=s=>/singapore/i.test(s)?s:s+', Singapore';
   window.open('https://www.google.com/maps/dir/?api=1'+(f?'&origin='+enc(sg(f)):'')+'&destination='+enc(sg(t))+'&travelmode=transit','_blank','noopener')};
 $$('[data-q]').forEach(b=>b.onclick=()=>{const [a,z]=b.dataset.q.split('|');$('#gFrom').value=a;$('#gTo').value=z});
-const dlg=$('#dlg');$('#btnSet').onclick=()=>{$('#sKey').value=store.get('lta');$('#sProxy').value=store.get('proxy');$('#sDgs').value=store.get('dgs');$('#sG').value=store.get('gkey');dlg.showModal()};
+const dlg=$('#dlg');$('#btnSet').onclick=()=>{$('#sKey').value=store.get('lta');$('#sProxy').value=store.get('proxy');$('#sProxy').placeholder=DEFAULT_PROXY+' (built in)';$('#sDgs').value=store.get('dgs');$('#sG').value=store.get('gkey');dlg.showModal()};
 $('#sCancel').onclick=()=>dlg.close();
 $('#sSave').onclick=()=>{store.set('lta',$('#sKey').value.trim());store.set('proxy',$('#sProxy').value.trim());store.set('dgs',$('#sDgs').value.trim());store.set('gkey',$('#sG').value.trim());dlg.close();refresh()};
 $('#btnRefresh').onclick=()=>refresh();
@@ -814,7 +769,7 @@ async function refresh(){
   await Promise.allSettled(jobs);renderAll();
   $('#stamp').textContent='Updated '+new Date().toLocaleTimeString('en-SG',{timeZone:TZ,hour:'2-digit',minute:'2-digit'})+' SGT · auto-refresh every 5 min';
   busy=false;
-  if(!S.healthLoaded){S.healthLoaded=true;loadHealth().then(renderAll)}
+  if(!S.healthTs||Date.now()-S.healthTs>36e5){S.healthTs=Date.now();loadHealth().then(renderAll)}
 }
 setInterval(()=>{if(!document.hidden)refresh()},300000);
 setInterval(()=>{if(!document.hidden&&$('#t-traffic').classList.contains('on')&&S.cams)loadTraffic().then(renderTraffic)},60000);
@@ -833,6 +788,299 @@ async function locate(){
     const again=()=>busy?setTimeout(again,300):refresh();again();
   }catch(e){console.info('Location not available:',e&&e.message)}
 }
+/* ================= v2: location-aware overview, health model, crossings per direction, graphics, detail popups ================= */
+const cityOf=id=>CITIES.find(c=>c.id===id)||CITIES[0];
+const selCC=()=>cityOf(S.sel).cc||'SG';
+const hCC=()=>store.get('hc')||selCC();
+const fmtN=v=>v==null||isNaN(v)?'–':Math.round(v).toLocaleString('en-SG');
+const MONF2=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+/* ---------- air helpers ---------- */
+const AQ_FACE=v=>v<=50?'😊':v<=100?'🙂':v<=150?'😷':v<=200?'😷':v<=300?'🤢':'☠️';
+const AQ_ADVICE=v=>v<=50?'Air is clean. Enjoy outdoor activities.':v<=100?'Acceptable. Unusually sensitive people may want shorter outdoor exercise.':v<=150?'Children, the elderly and people with asthma should cut down on long outdoor exercise.':v<=200?'Everyone should reduce long or heavy outdoor activity. Sensitive people should stay indoors.':v<=300?'Avoid outdoor exercise. Keep windows closed and consider an N95 mask outside.':'Stay indoors with windows closed. Wear an N95 mask if you must go out.';
+function arcPath(cx,cy,r,a0,a1){const p=a=>[cx+r*Math.cos(Math.PI*(1-a)),cy-r*Math.sin(Math.PI*(1-a))];const [x0,y0]=p(a0),[x1,y1]=p(a1);return `M${x0.toFixed(1)} ${y0.toFixed(1)}A${r} ${r} 0 0 1 ${x1.toFixed(1)} ${y1.toFixed(1)}`}
+function gaugeSVG(v,w=260){
+  const cap=300,f=Math.max(0,Math.min(1,(v||0)/cap)),cx=130,cy=120,r=95;
+  const segs=AQ_BANDS.slice(0,5).map((b,i)=>{const a0=b[0]/cap,a1=Math.min(b[1],cap)/cap;return `<path d="${arcPath(cx,cy,r,a0,a1)}" stroke="${b[2]}" stroke-width="20" fill="none"/>`}).join('');
+  const ang=Math.PI*(1-f),nx=cx+(r-26)*Math.cos(ang),ny=cy-(r-26)*Math.sin(ang);
+  const c=aqCat(v);
+  return `<svg viewBox="0 0 260 150" width="${w}" style="max-width:100%">${segs}<line x1="${cx}" y1="${cy}" x2="${nx.toFixed(1)}" y2="${ny.toFixed(1)}" stroke="#14213d" stroke-width="4" stroke-linecap="round"/><circle cx="${cx}" cy="${cy}" r="8" fill="#14213d"/>
+   <text x="${cx}" y="${cy+30}" text-anchor="middle" font-size="26" font-weight="800" fill="#14213d">${v==null||isNaN(v)?'–':Math.round(v)}</text><text x="20" y="140" font-size="10" fill="#5b667a">0 clean</text><text x="240" y="140" font-size="10" text-anchor="end" fill="#5b667a">300+ bad</text></svg>`;
+}
+function aqStrip(a,n=24){
+  const h=a.a.hourly,i0=a.i;let cells='';
+  for(let k=0;k<n;k++){const v=h.us_aqi[i0+k];if(v==null)continue;const c=aqCat(v);cells+=`<div class="aqc" title="${tm(h.time[i0+k])} · ${Math.round(v)} (${c.l})" style="background:${c.c};color:${c.t}"><b>${Math.round(v)}</b><span>${k===0?'now':tm(h.time[i0+k]).slice(0,2)}</span></div>`}
+  return `<div class="aqstrip">${cells}</div>`;
+}
+function sgPsi(){const p=S.sg_psi&&((S.sg_psi.items&&S.sg_psi.items[0])||S.sg_psi),r=(p&&p.readings)||{};let pm=r.pm25_one_hourly||{};if(!Object.keys(pm).length){const q=S.sg_pm&&((S.sg_pm.items&&S.sg_pm.items[0])||S.sg_pm);pm=((q&&q.readings)||{}).pm25_one_hourly||{}}return{psi:r.psi_twenty_four_hourly||{},pm,ts:p&&p.timestamp}}
+const psiBand=v=>aqCat(v<=50?25:v<=100?75:v<=200?175:v<=300?250:350);
+function renderAirVisual(){
+  const sel=$('#aqCity').value||S.sel,a=aqNow(sel),c=cityOf(sel);
+  $('#aqHeroSel').value=sel;
+  if(!a){$('#aqHero').innerHTML=errBox('aq')||'<span class="mute">Loading air quality…</span>';}
+  else{
+    const cat=aqCat(a.v),pc=aqCat(a.peak);
+    $('#aqHero').innerHTML=`<div class="row" style="align-items:center;justify-content:center;gap:18px">
+      <div style="text-align:center">${gaugeSVG(a.v)}<div class="chip" style="background:${cat.c};color:${cat.t};font-size:14px;padding:4px 14px">${AQ_FACE(a.v)} ${cat.l}</div></div>
+      <div style="flex:1;min-width:220px"><div class="big" style="font-size:22px">${esc(c.name.replace('📍 ',''))}</div>
+       <p style="margin:6px 0">${AQ_ADVICE(a.v)}</p>
+       <div class="small mute">Fine dust now: <b>${round(a.pm,1)}</b> · Worst in the next 24 h: <b style="color:${pc.c==='#e0b100'?'#9a7a00':pc.c}">${Math.round(a.peak)} (${pc.l})</b></div>
+       <div class="small mute" style="margin-top:6px">Next 24 hours (tap a block):</div>${aqStrip(a)}</div></div>`;
+  }
+  const {psi,pm,ts}=sgPsi(),keys=['north','west','central','east','south','national'];
+  $('#psiTiles').innerHTML=Object.keys(psi).length?`<div class="sgmap">${keys.filter(k=>k!=='national'&&psi[k]!=null).map(k=>{const b=psiBand(psi[k]);return `<div class="sgt sg-${k}" data-detail="psi:${k}" style="background:${b.c};color:${b.t}"><b>${psi[k]}</b><span>${k[0].toUpperCase()+k.slice(1)}</span></div>`}).join('')}</div>
+    <div class="small mute" style="text-align:center">Singapore today · tap an area${psi.national!=null?' · Overall <b>'+psi.national+'</b>':''}</div>`:(errBox('sg_psi')||'<span class="mute">Official Singapore readings unavailable.</span>');
+}
+function renderAir(){
+  if(!S.aqPicked&&CITIES.some(c=>c.id===S.sel))$('#aqCity').value=S.sel;
+  renderAirBase();try{renderAirVisual()}catch(e){console.error('airvis',e)}
+  $$('#aqTable tr').forEach((tr,i)=>{if(i>0&&CITIES[i-1])tr.dataset.detail='air:'+CITIES[i-1].id,tr.style.cursor='pointer'});
+}
+
+/* ---------- health model ---------- */
+function weekInfo(w){const yr=Math.floor(w/100),wk=w%100,d=new Date(Date.UTC(yr,0,1+(wk-1)*7));return{yr,wk,d,m:d.getUTCMonth(),label:`${MONF2[d.getUTCMonth()]} ${d.getUTCFullYear()}`,age:(Date.now()-d.getTime())/6048e5}}
+function healthModel(cc){
+  const out=[];
+  DISEASES.forEach(d=>{
+    const L=cc==='SG'?(S.health||{})[d.k]:null;let live=null;
+    if(L&&L.vals&&L.vals.length>8){
+      const n=L.vals.length,v=L.vals,wi=weekInfo(L.weeks[n-1]);
+      const last4=v.slice(-4).reduce((a,b)=>a+b,0)/4,prev4=v.slice(-8,-4).reduce((a,b)=>a+b,0)/4,pct=prev4?(last4-prev4)/prev4*100:0;
+      const k=Math.min(52,n),vs=v.slice(-k),ws=L.weeks.slice(-k);
+      const pi=vs.indexOf(Math.max(...vs)),ti=vs.indexOf(Math.min(...vs));
+      live={n,v,vs,ws,wi,last4,prev4,pct,pi,ti,age:wi.age,stale:wi.age>12};
+    }
+    const surge=live&&!live.stale&&live.pct>=30;
+    if((d.k==='conj'||d.k==='diar')&&!surge)return;
+    if(live&&!live.stale){
+      const st=live.pct>10?'up':live.pct<-10?'down':'flat';
+      out.push({d,mode:'live',status:st,pct:live.pct,vals:live.vs,pk:live.pi,tr:live.ti,now:live.vs.length-1,
+        nowV:live.vs[live.vs.length-1],pkV:live.vs[live.pi],trV:live.vs[live.ti],
+        pkWhen:weekInfo(live.ws[live.pi]).label,trWhen:weekInfo(live.ws[live.ti]).label,nowWhen:`W${live.wi.wk} ${live.wi.label}`,
+        xl:i=>{const w=weekInfo(live.ws[i]);return MONF2[w.m]},fresh:live});
+      return;
+    }
+    const base=cc==='SG'?BASE.SG[d.k]:BASE.MY[d.k];
+    let curve=null;if(live&&live.stale)curve=liveCurve(L);else if(base)curve=baseCurve(base);
+    if(!curve)return;
+    const mx=Math.max(...curve),idx=curve.map(v=>v/mx*100),cm=SGT_MONTH(),next=(idx[(cm+1)%12]+idx[(cm+2)%12])/2,prev=(idx[(cm+11)%12]+idx[cm])/2,dd=next-prev;
+    const st=dd>8?'up':dd<-8?'down':'flat',pi=idx.indexOf(Math.max(...idx)),ti=idx.indexOf(Math.min(...idx));
+    out.push({d,mode:'seasonal',status:st,vals:idx,pk:pi,tr:ti,now:cm,nowV:idx[cm],pkV:idx[pi],trV:idx[ti],pkWhen:MONF2[pi],trWhen:MONF2[ti],nowWhen:MONF2[cm],xl:i=>MONF2[i],stale:live&&live.stale,fresh:live});
+  });
+  return out;
+}
+const HST={up:['📈','#d8403a'],down:['📉','#2e9e5b'],flat:['➡️','#5b667a']};
+function hText(e){
+  if(e.mode==='live')return e.status==='up'?'More people are getting sick':e.status==='down'?'Fewer people are getting sick':'About the same as before';
+  return e.status==='up'?'Usually rising at this time of year':e.status==='down'?'Usually easing at this time of year':'Usually steady at this time of year';
+}
+function hChart(e){
+  const v=e.vals,W=320,H=110,mx=Math.max(...v)||1,x=i=>10+i*((W-20)/Math.max(1,v.length-1)),y=vv=>H-22-(vv/mx)*(H-44);
+  let p='';v.forEach((vv,i)=>p+=(i?'L':'M')+x(i).toFixed(1)+' '+y(vv).toFixed(1));
+  const area=p+`L${x(v.length-1)} ${H-22}L${x(0)} ${H-22}Z`,F=e.mode==='live'?fmtN:(n=>Math.round(n));
+  const lab=(i,txt,col,dy)=>{const tx=Math.min(W-34,Math.max(34,x(i)));return `<text x="${tx}" y="${y(v[i])+dy}" font-size="10" font-weight="700" text-anchor="middle" fill="${col}">${txt}</text>`};
+  const ticks=[0,Math.floor(v.length/4),Math.floor(v.length/2),Math.floor(v.length*3/4),v.length-1].map(i=>`<text x="${x(i)}" y="${H-6}" font-size="9" text-anchor="middle" fill="#5b667a">${e.xl(i)}</text>`).join('');
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%"><path d="${area}" fill="#0b5cff" opacity=".1"/><path d="${p}" fill="none" stroke="#0b5cff" stroke-width="2.2"/>
+   <circle cx="${x(e.pk)}" cy="${y(v[e.pk])}" r="4.5" fill="#d8403a"/>${lab(e.pk,'Peak '+F(e.pkV),'#d8403a',-8)}
+   <circle cx="${x(e.tr)}" cy="${y(v[e.tr])}" r="4.5" fill="#2e9e5b"/>${lab(e.tr,'Low '+F(e.trV),'#2e9e5b',16)}
+   <circle cx="${x(e.now)}" cy="${y(v[e.now])}" r="5.5" fill="#14213d"/>${ticks}</svg>`;
+}
+function hCard(e,cc,full){
+  const st=HST[e.status],unit=e.mode==='live'?'cases / week':'index (100 = busiest month)',F=e.mode==='live'?fmtN:(n=>Math.round(n));
+  const live=e.mode==='live';
+  const sent=live?(e.status==='up'?`<b>${fmtN(e.fresh.last4)}</b> cases a week lately, up <b>${Math.round(e.pct)}%</b> on the 4 weeks before.`:e.status==='down'?`<b>${fmtN(e.fresh.last4)}</b> cases a week lately, down <b>${Math.round(-e.pct)}%</b> on the 4 weeks before.`:`<b>${fmtN(e.fresh.last4)}</b> cases a week lately, about the same as the 4 weeks before.`):`Typical yearly pattern – busiest around <b>${e.pkWhen}</b>, quietest around <b>${e.trWhen}</b>.`;
+  const fr=live?(e.fresh.age<=3?`✅ Latest data: week ${e.fresh.wi.wk} of ${e.fresh.wi.yr}`:`⚠️ Latest published data is week ${e.fresh.wi.wk} of ${e.fresh.wi.yr} (${Math.round(e.fresh.age)} weeks old)`)+` · checked ${S.healthChecked?new Date(S.healthChecked).toLocaleTimeString('en-SG',{timeZone:TZ,hour:'2-digit',minute:'2-digit'}):'–'}`:`ℹ️ Typical pattern, not live counts${e.stale?' (live feed is out of date)':''}.`;
+  return `<div class="card hcard" data-detail="health:${cc}:${e.d.k}"><h2>${e.d.icon} ${e.d.label}</h2>
+   <div class="hbanner" style="background:${st[1]}14;border-color:${st[1]}"><span style="font-size:28px">${st[0]}</span><div><div class="hb-t" style="color:${st[1]}">${hText(e)}</div><div class="small">${sent}</div></div></div>
+   <div class="hnums"><div><span>${live?'Latest week':'Now'}</span><b>${F(live?e.nowV:e.nowV)}</b><i>${esc(e.nowWhen)}</i></div><div class="pk"><span>Peak ▲</span><b>${F(e.pkV)}</b><i>${esc(e.pkWhen)}</i></div><div class="tr"><span>Lowest ▼</span><b>${F(e.trV)}</b><i>${esc(e.trWhen)}</i></div></div>
+   <div class="small mute" style="margin:2px 0">${live?'Past 12 months · weekly cases':'A typical year · '+unit}</div>${hChart(e)}
+   <div class="small mute">${fr}</div></div>`;
+}
+function renderHealth(){
+  const cc=hCC(),model=healthModel(cc)||[],name=cc==='SG'?'Singapore':'Malaysia',ups=model.filter(e=>e.status==='up'),liveUps=ups.filter(e=>e.mode==='live');
+  S.healthSignals=liveUps.map(e=>`Singapore: ${e.d.label} cases rising (+${Math.round(e.pct)}% vs the previous 4 weeks).`);
+  const seg=`<div class="seg"><button data-hc="SG" class="${cc==='SG'?'on':''}">🇸🇬 Singapore</button><button data-hc="MY" class="${cc==='MY'?'on':''}">🇲🇾 Malaysia</button></div>`;
+  let head;
+  if(liveUps.length)head=`<div class="alert red"><b>📈 More people are getting sick in ${name}:</b> ${liveUps.map(e=>e.d.icon+' '+e.d.label.split(' (')[0].split(' /')[0]).join(', ')}.</div>`;
+  else if(ups.length)head=`<div class="alert blue"><b>Typically rising at this time of year in ${name}:</b> ${ups.map(e=>e.d.icon+' '+e.d.label.split(' (')[0].split(' /')[0]).join(', ')}. <span class="small">(Seasonal pattern – not live counts.)</span></div>`;
+  else head=`<div class="alert green"><b>✅ Nothing looks to be on the rise in ${name} right now.</b></div>`;
+  let html=`<div class="row" style="margin-bottom:8px">${seg}<span class="small mute">${selCC()===cc?'📍 Based on your location – tap to switch':'Showing '+name}</span></div>${head}`;
+  html+=`<div class="g2">${model.map(e=>hCard(e,cc)).join('')||'<div class="card mute">No data</div>'}</div>`;
+  const hidden=['conj','diar'].filter(k=>!model.some(e=>e.d.k===k)).length;
+  html+=`<div class="small mute" style="margin-top:8px"><b>How to read:</b> the line is the number of people over time. <span style="color:#d8403a">Red dot = the peak</span>, <span style="color:#2e9e5b">green dot = the lowest point</span>, black dot = now. “More people are getting sick” means the latest 4 weeks are over 10% higher than the 4 weeks before.</div>`;
+  if(cc==='MY')html+=`<div class="small mute" style="margin-top:6px">Malaysia does not publish weekly flu or HFMD counts as an open feed, so these are typical seasonal patterns (index, not case counts). For dengue see <a target="_blank" rel="noopener" href="https://outbreak.my/stats/">Outbreak.MY</a>.</div>`;
+  if(cc==='SG'&&S.errors.health)html+='<div class="small mute" style="margin-top:6px">ℹ️ Live Singapore weekly case data could not be reached from this browser, so typical patterns are shown. Press Refresh to retry.</div>';
+  if(cc==='SG'&&hidden)html+='<div class="small mute" style="margin-top:6px">Minor illnesses (sore eyes, diarrhoea) appear only if a surge (30%+) is detected.</div>';
+  $('#healthBox').innerHTML=html;
+  $$('#healthBox [data-hc]').forEach(b=>b.onclick=()=>{store.set('hc',b.dataset.hc);renderHealth();renderOverview()});
+}
+
+/* ---------- crossings: each direction ---------- */
+function renderCrossings(){
+  const box=$('#crossBox');if(!box)return;
+  const hist=JSON.parse(store.get('xhist','{}'));
+  if(S.errors.cross==='NOKEY'||!Object.keys(S.cross||{}).length){
+    box.innerHTML=(S.errors.cross&&S.errors.cross!=='NOKEY'?errBox('cross'):'<div class="alert blue small">Add a <b>Google Maps API key</b> (Routes API enabled), or a <b>proxy URL</b> that has one, in ⚙ Settings to see live drive times each way. Until then, tap a button to see the live time in Google Maps.</div>')+
+     `<div class="g2">${LINKS.map(L=>`<div class="card" style="box-shadow:none"><b>${L.icon} ${L.name}</b><div class="row" style="margin-top:8px"><a class="btn2" target="_blank" rel="noopener" href="${gmapsDir(L.sg,L.my)}">SG → JB ↗</a><a class="btn2 alt" target="_blank" rel="noopener" href="${gmapsDir(L.my,L.sg)}">JB → SG ↗</a></div></div>`).join('')}</div>`;
+    $('#crossTs').textContent='';return;
+  }
+  $('#crossTs').textContent=S.crossTs?'updated '+S.crossTs:'';
+  const dirs=[['to','🇸🇬 → 🇲🇾','Going to Johor Bahru'],['back','🇲🇾 → 🇸🇬','Coming back to Singapore']];
+  box.innerHTML=`<div class="g2">${dirs.map(([k,fl,title])=>{
+    const rows=LINKS.filter(L=>S.cross[L.id]).map(L=>({L,v:S.cross[L.id][k]}));
+    const mx=Math.max(60,...rows.map(r=>r.v.min));let ban='';
+    if(rows.length>1){const d=Math.abs(rows[0].v.min-rows[1].v.min),b=rows[0].v.min<=rows[1].v.min?rows[0]:rows[1];ban=d<3?'<div class="alert green small">⚖️ Both links take about the same time.</div>':`<div class="alert green small">🏁 <b>${b.L.name}</b> is about <b>${Math.round(d)} min faster</b> right now.</div>`}
+    return `<div class="card" style="box-shadow:none"><h2>${fl} ${title}</h2>${ban}${rows.map(({L,v})=>{
+      const delay=Math.max(0,v.min-v.free),lv=delayLvl(delay),vals=(hist[L.id+'|'+k]||[]).filter(p=>Date.now()-p[0]<864e5).map(p=>p[1]);
+      return `<div class="xrow" data-detail="cross:${L.id}"><div class="row" style="justify-content:space-between"><b>${L.icon} ${L.name}</b><span class="chip" style="background:${lv[1]}">${lv[0]}${delay>=1?' · +'+Math.round(delay)+' min':''}</span></div>
+       <div class="row" style="align-items:baseline;gap:6px"><span class="big">${Math.round(v.min)}</span><span class="mute">min to clear</span></div>
+       <div class="bar"><i style="width:${Math.min(100,v.min/mx*100)}%;background:${lv[1]}"></i></div>
+       <div class="small mute">${Math.round(v.km)} km · no-traffic time ${Math.round(v.free)} min${vals.length>1?' · last 24 h here: '+Math.round(Math.min(...vals))+'–'+Math.round(Math.max(...vals))+' min':''}</div></div>`}).join('')}</div>`}).join('')}</div>
+   <div class="small mute" style="margin-top:6px">Drive time between the two checkpoints including the road queue; updated at most every 30 minutes. Immigration counter waiting time is not included — add 10–60+ min on busy days.</div>`;
+}
+
+/* ---------- public transport graphics ---------- */
+const busSVG=(w=90)=>`<svg viewBox="0 0 120 60" width="${w}"><rect x="4" y="8" width="108" height="38" rx="9" fill="#e8483f"/><rect x="4" y="30" width="108" height="6" fill="#fff" opacity=".85"/><g fill="#cfe8ff"><rect x="12" y="14" width="20" height="14" rx="3"/><rect x="36" y="14" width="20" height="14" rx="3"/><rect x="60" y="14" width="20" height="14" rx="3"/><rect x="84" y="14" width="22" height="14" rx="3"/></g><rect x="100" y="38" width="10" height="5" rx="2" fill="#ffd54a"/><circle cx="30" cy="48" r="8" fill="#14213d"/><circle cx="30" cy="48" r="3.5" fill="#cfd6e4"/><circle cx="86" cy="48" r="8" fill="#14213d"/><circle cx="86" cy="48" r="3.5" fill="#cfd6e4"/></svg>`;
+const trainSVG=(w=120)=>`<svg viewBox="0 0 160 56" width="${w}"><rect x="4" y="6" width="152" height="36" rx="14" fill="#fff" stroke="#c3cbd9" stroke-width="2"/><rect x="4" y="26" width="152" height="6" fill="#d42e12"/><g fill="#9fc2ff"><rect x="14" y="12" width="22" height="12" rx="3"/><rect x="42" y="12" width="22" height="12" rx="3"/><rect x="70" y="12" width="22" height="12" rx="3"/><rect x="98" y="12" width="22" height="12" rx="3"/></g><path d="M126 12h20q8 0 8 10v4h-28z" fill="#9fc2ff"/><circle cx="22" cy="46" r="5" fill="#14213d"/><circle cx="50" cy="46" r="5" fill="#14213d"/><circle cx="110" cy="46" r="5" fill="#14213d"/><circle cx="138" cy="46" r="5" fill="#14213d"/><rect x="0" y="50" width="160" height="3" rx="1.5" fill="#8793a6"/></svg>`;
+const MRT_LINES=[['NSL','North-South','#d42e12'],['EWL','East-West','#009645'],['NEL','North East','#9900aa'],['CCL','Circle','#fa9e0d'],['DTL','Downtown','#005ec4'],['TEL','Thomson-East Coast','#9d5b25'],['BPL','Bukit Panjang LRT','#748477'],['SKL','Sengkang LRT','#748477'],['PGL','Punggol LRT','#748477']];
+function renderTransit(){
+  const noKey=S.errors.train==='NOKEY';let segs=[];
+  if(S.train)segs=S.train.AffectedSegments||[];
+  const bad=new Set(segs.map(s=>String(s.Line||'').toUpperCase()));
+  const known=!!S.train;
+  let board=`<div class="trhero">${trainSVG(130)}<div><div class="big" style="font-size:20px">MRT &amp; LRT service</div><div class="small mute">${noKey?'Live line status unavailable right now – check the proxy in ⚙ Settings':known?(bad.size?`⚠️ ${bad.size} line${bad.size>1?'s':''} affected`:'✅ All lines running normally'):'Status unavailable'}</div></div><div class="sp"></div>${busSVG(90)}</div>`;
+  board+=`<div class="lines">${MRT_LINES.map(([c,n,col])=>{const b=bad.has(c),st=!known?'–':b?'Disrupted':'Normal';return `<div class="ln ${b?'bad':''}" data-detail="line:${c}"><span class="lb" style="background:${col}">${c}</span><div><b>${n}</b><div class="small ${b?'err':'mute'}">${!known?'Unknown':b?'⚠️ Disrupted':'✅ Normal'}</div></div></div>`}).join('')}<div class="ln mapt" data-detail="mrtmap"><span class="lb" style="background:#14213d">🗺️</span><div><b>MRT network map</b><div class="small mute">Tap to see the whole network</div></div></div></div>`;
+  if(known)board+=segs.length?segs.map(s=>`<div class="alert red">🚇 <b>${esc(s.Line)}</b> ${esc(s.Direction||'')} – ${esc(s.Stations||'')}${s.FreePublicBus?'<br>🚌 Free bus: '+esc(s.FreePublicBus):''}${s.FreeMRTShuttle?'<br>🚆 Free MRT shuttle: '+esc(s.FreeMRTShuttle):''}</div>`).join('')+((S.train.Message||[]).map(m=>`<div class="small mute">${esc(m.Content)}</div>`).join('')):'';
+  else if(!noKey)board+=errBox('train');
+  $('#trainBox').innerHTML=board;
+  const ic=t=>/bus/i.test(t)?'🚌':/lrt/i.test(t)?'🚈':'🚆';
+  $('#newsBox').innerHTML=S.news?(S.news.length?`<ul class="wl">${S.news.map(n=>`<li>${ic(n.title||'')} <a href="${esc(n.link)}" target="_blank" rel="noopener">${esc(n.title)}</a><div class="small mute">${esc(n.pubDate||'')}</div></li>`).join('')}</ul>`:'<div class="alert green">✅ No MRT/LRT/bus disruption headlines in the last 3 days.</div>'):(errBox('news')||'<span class="mute">News unavailable.</span>');
+}
+
+/* ---------- overview ---------- */
+function renderOverview(){
+  const al=[];
+  const sgWarn=(S.sg_two&&S.sg_two.items&&S.sg_two.items[0]&&S.sg_two.items[0].forecasts||[]).filter(f=>/thunder/i.test(f.forecast));
+  if(sgWarn.length)al.push(['⛈️',`NEA 2-hour forecast: thunderstorms expected in ${sgWarn.slice(0,6).map(f=>esc(f.area)).join(', ')}${sgWarn.length>6?' +'+(sgWarn.length-6)+' more':''}.`,'']);
+  (S.myWarn||[]).filter(w=>!w.valid_to||new Date(w.valid_to.replace(' ','T')+'+08:00')>new Date()).slice(0,3).forEach(w=>al.push(['⚠️',`MET Malaysia: ${esc((w.warning_issue&&(w.warning_issue.title_en||w.warning_issue.title_bm))||w.heading_en||'Weather warning')}${w.text_en?' – '+esc(String(w.text_en).slice(0,160)):''}`,'']));
+  {const bad=[],poor=[];CITIES.forEach(c=>{const a=aqNow(c.id);if(!a)return;if(a.peak>=151)bad.push(`${esc(c.name.replace('📍 ',''))} (${Math.round(a.peak)})`);else if(a.peak>=101)poor.push(`${esc(c.name.replace('📍 ',''))} (${Math.round(a.peak)})`)});
+   if(bad.length)al.push(['😷',`Air quality forecast to reach <b>unhealthy</b> levels in: ${bad.join(', ')}.`,'red']);
+   if(poor.length)al.push(['😷',`Air quality may be <b>poor for sensitive people</b> in: ${poor.join(', ')}.`,'']);}
+  {const c=curOf(S.sel);if(c){const o=windOutlook(c.h,c.i),w=o.find(x=>x.k==='shift'||x.k==='gust');if(w)al.push(['🌬️',`${esc(cityOf(S.sel).name.replace('📍 ',''))}: ${w.text}`,'blue'])}}
+  if(Array.isArray(S.train&&S.train.AffectedSegments)&&S.train.AffectedSegments.length)al.push(['🚇','MRT/LRT service disruption reported – see Public Transport tab.','red']);
+  (S.healthSignals||[]).forEach(s=>al.push(['🦠',s,'']));
+  if(S.incidents&&S.incidents.length)al.push(['🚧',`${S.incidents.length} traffic incident(s) reported near the Woodlands / Tuas checkpoints.`,'red']);
+  else if((S.ett||[]).some(r=>/BKE/i.test(r.Name)&&+r.EstTime>=18))al.push(['🐢','BKE (Woodlands approach) travel times look elevated – expect delays towards the Causeway.','']);
+  renderAlertBar(al);
+  if($('#airAlerts'))$('#airAlerts').innerHTML='';if($('#trAlerts'))$('#trAlerts').innerHTML='';
+  if($('#ovSel'))$('#ovSel').value=S.sel;
+  const c=cityOf(S.sel),x=curOf(S.sel),a=aqNow(S.sel),tiles=[];
+  $('#ovHint').textContent=S.sel==='me'?'📍 Using your current location':'';
+  // weather
+  if(x){const [ic,tx]=WMO(x.c.weather_code),p3=Math.max(...x.h.precipitation_probability.slice(x.i,x.i+4).filter(v=>v!=null),0);
+    tiles.push(`<div class="card tile" data-detail="weather:${c.id}"><h2>🌤️ Weather <span class="small mute">details ›</span></h2><div class="row"><span style="font-size:44px">${ic}</span><span class="big">${round(x.c.temperature_2m)}°</span></div><div class="small" style="margin-top:4px">${esc(tx)} · feels ${round(x.c.apparent_temperature)}° · 💧${round(x.c.relative_humidity_2m)}%</div><div class="small mute">Rain next 3 h: <b>${round(p3)}%</b> · Wind ${arrow(x.c.wind_direction_10m,14)} ${compass(x.c.wind_direction_10m)} ${round(x.c.wind_speed_10m)} km/h</div></div>`)}
+  else tiles.push(`<div class="card tile"><h2>🌤️ Weather</h2><span class="mute">${errBox('wx')||'Loading…'}</span></div>`);
+  // air
+  if(a){const cat=aqCat(a.v),pc=aqCat(a.peak);
+    tiles.push(`<div class="card tile" data-detail="air:${c.id}"><h2>🌫️ Air quality <span class="small mute">details ›</span></h2><div class="row"><span style="font-size:44px">${AQ_FACE(a.v)}</span><span class="big" style="color:${cat.c==='#e0b100'?'#9a7a00':cat.c}">${Math.round(a.v)}</span></div><div class="small" style="margin-top:4px"><span class="chip" style="background:${cat.c};color:${cat.t}">${cat.l}</span></div><div class="small mute">Worst in next 24 h: <b>${Math.round(a.peak)}</b> (${pc.l})</div></div>`)}
+  else tiles.push(`<div class="card tile"><h2>🌫️ Air quality</h2><span class="mute">${errBox('aq')||'Loading…'}</span></div>`);
+  // health
+  const cc=c.cc||'SG',hm=healthModel(cc)||[],up=hm.filter(e=>e.status==='up'),anyLive=hm.some(e=>e.mode==='live'),upLive=up.filter(e=>e.mode==='live');
+  const hl=upLive.length?`<span class="chip" style="background:#d8403a">📈 More people sick</span>`:up.length?`<span class="chip" style="background:#c98a00">Typically rising now</span>`:`<span class="chip" style="background:#2e9e5b">✅ Nothing rising</span>`;
+  tiles.push(`<div class="card tile" data-detail="health:${cc}"><h2>🦠 Health · ${cc==='SG'?'Singapore':'Malaysia'} <span class="small mute">details ›</span></h2><div style="margin:4px 0 8px">${hl}</div>${hm.slice(0,3).map(e=>`<div class="small">${e.d.icon} ${e.d.label.split(' (')[0].split(' /')[0]} <b style="color:${HST[e.status][1]}">${HST[e.status][0]} ${e.status==='up'?'rising':e.status==='down'?'easing':'steady'}</b> <span class="mute">· now ${e.mode==='live'?fmtN(e.nowV)+'/wk':Math.round(e.nowV)+'/100'}</span></div>`).join('')}<div class="small mute" style="margin-top:4px">${anyLive?'Live weekly counts':'Typical seasonal pattern'}</div></div>`);
+  // causeway
+  let cw;
+  if(S.cross&&Object.keys(S.cross).length){const line=k=>LINKS.filter(L=>S.cross[L.id]).map(L=>`${L.id==='cw'?'Woodlands':'Tuas'} <b>${Math.round(S.cross[L.id][k].min)}</b> min`).join(' · ');
+    cw=`<div class="small mute" style="margin-top:2px">🇸🇬 → 🇲🇾 to JB</div><div>${line('to')}</div><div class="small mute" style="margin-top:6px">🇲🇾 → 🇸🇬 back</div><div>${line('back')}</div>`}
+  else cw=`<div class="small mute" style="margin-top:6px">Tap for live cameras and Google Maps traffic. Add a Google key or proxy in ⚙ Settings to see minutes each way.</div>`;
+  tiles.push(`<div class="card tile" data-detail="cross"><h2>🚗 Causeway traffic <span class="small mute">details ›</span></h2><div class="small mute">Woodlands &amp; Tuas Second Link</div>${cw}</div>`);
+  $('#ovTiles').innerHTML=tiles.join('');
+  $('#cityCards').innerHTML=CITIES.filter(z=>z.id!==S.sel).map(z=>{
+    const xx=curOf(z.id),aa=aqNow(z.id);if(!xx)return `<div class="card city"><h2>${esc(z.name)}</h2><span class="mute">No data</span></div>`;
+    const [ic]=WMO(xx.c.weather_code),cat=aqCat(aa&&aa.v);
+    return `<div class="card city" data-id="${z.id}" style="padding:10px"><div class="row"><span style="font-size:26px">${ic}</span><b>${round(xx.c.temperature_2m)}°</b><span class="sp"></span><span class="chip" style="background:${cat.c};color:${cat.t}">Air ${aa&&aa.v!=null?Math.round(aa.v):'–'}</span></div><div class="small">${esc(z.name)}</div></div>`}).join('');
+  $$('#cityCards .city[data-id]').forEach(e=>e.onclick=()=>{S.userPicked=true;S.sel=e.dataset.id;store.set('city',S.sel);$('#citySel').value=S.sel;renderAll();window.scrollTo(0,0)});
+}
+
+
+function renderAlertBar(al){
+  const bar=$('#alertBar');if(!bar)return;
+  const clean=t=>String(t).replace(/<[^>]+>/g,'');
+  const sig=al.map(a=>clean(a[1])).join('|');let dis=null;try{dis=JSON.parse(store.get('adis','null'))}catch(e){}
+  if(!al.length||(dis&&dis.sig===sig&&Date.now()-dis.t<864e5)){bar.innerHTML='';return}
+  const red=al.some(a=>a[2]==='red'),col=red?'var(--bad)':'var(--usg)',open=!!S.alertOpen;
+  bar.innerHTML=`<div class="abar" style="border-color:${col}"><div class="abar-top"><span class="abar-t">${red?'🚨':'⚠️'} <b>${al.length} alert${al.length>1?'s':''}</b> in the last 24 h${open?'':' · '+esc(clean(al[0][1]).slice(0,70))+(clean(al[0][1]).length>70?'…':'')}</span><button class="abtn" id="abToggle">${open?'Hide':'View'}</button><button class="abtn" id="abX" title="Dismiss for today" aria-label="Dismiss">✕</button></div>${open?`<div class="abar-list">${al.map(a=>`<div>${a[0]} ${a[1]}</div>`).join('')}</div>`:''}</div>`;
+  $('#abToggle').onclick=()=>{S.alertOpen=!S.alertOpen;renderAlertBar(al)};
+  $('#abX').onclick=()=>{store.set('adis',JSON.stringify({sig,t:Date.now()}));renderAlertBar(al)};
+}
+/* ---------- detail popups ---------- */
+function detailHTML(kind,a1,a2){
+  if(kind==='weather'){
+    const x=curOf(a1),c=cityOf(a1);if(!x)return '<div class="err">No weather data yet.</div>';
+    const [ic,tx]=WMO(x.c.weather_code),h=x.h,i=x.i;
+    const cells=[];for(let k=0;k<12&&i+k<h.time.length;k++)cells.push(`<div class="hr"><b>${k?tm(h.time[i+k]):'Now'}</b><div style="font-size:20px">${WMO(h.weather_code[i+k])[0]}</div>${round(h.temperature_2m[i+k])}°<div class="small mute">💧${round(h.precipitation_probability[i+k])}%</div><div class="small mute">${round(h.wind_speed_10m[i+k])} km/h</div></div>`);
+    return `<h2 style="margin-top:0">${esc(c.name)} · weather</h2><div class="row"><span style="font-size:52px">${ic}</span><div><div class="big">${round(x.c.temperature_2m)}°C</div><div class="mute">${esc(tx)} · feels ${round(x.c.apparent_temperature)}°</div></div></div>
+     <table style="margin:8px 0"><tr><td>Humidity</td><td>${round(x.c.relative_humidity_2m)}%</td><td>Cloud cover</td><td>${round(x.c.cloud_cover)}%</td></tr><tr><td>Wind</td><td>${arrow(x.c.wind_direction_10m,14)} ${compass(x.c.wind_direction_10m)} ${round(x.c.wind_speed_10m)} km/h</td><td>Gusts</td><td>${round(x.c.wind_gusts_10m)} km/h</td></tr></table>
+     <h3>Next 12 hours</h3><div class="hrs">${cells.join('')}</div><h3>What will the wind do?</h3><ul class="wl small">${windOutlook(h,i).map(o=>`<li>${o.icon} ${o.text}</li>`).join('')}</ul>
+     <div class="row" style="margin-top:10px"><button class="btn2" data-go="weather" data-sel="${c.id}">Full forecast</button><button class="btn2 alt" data-go="clouds">Moving clouds</button></div>`;
+  }
+  if(kind==='air'){
+    const a=aqNow(a1),c=cityOf(a1);if(!a)return '<div class="err">No air-quality data yet.</div>';
+    const cat=aqCat(a.v),h=a.a.hourly,fut=h.us_aqi.slice(a.i,a.i+49);let pk=0,pi=0,mn=1e9,mi=0;fut.forEach((v,k)=>{if(v==null)return;if(v>pk){pk=v;pi=k}if(v<mn){mn=v;mi=k}});
+    return `<h2 style="margin-top:0">${esc(c.name)} · air quality</h2><div style="text-align:center">${gaugeSVG(a.v,240)}<div class="chip" style="background:${cat.c};color:${cat.t};font-size:14px;padding:4px 14px">${AQ_FACE(a.v)} ${cat.l}</div></div>
+     <p>${AQ_ADVICE(a.v)}</p><table><tr><td>Fine dust (PM2.5) now</td><td><b>${round(a.pm,1)}</b></td></tr><tr><td>Worst expected (next 2 days)</td><td><b>${Math.round(pk)}</b> at ${tm(h.time[a.i+pi])}, ${dayName(h.time[a.i+pi])}</td></tr><tr><td>Best time to be outside</td><td><b>${Math.round(mn)}</b> at ${tm(h.time[a.i+mi])}, ${dayName(h.time[a.i+mi])}</td></tr></table>
+     <h3>Next 24 hours</h3>${aqStrip(a,24)}<div class="small mute" style="margin-top:6px">Score: 0–50 good · 51–100 moderate · 101–150 poor for sensitive people · 151–200 unhealthy · 201–300 very unhealthy · 300+ hazardous.</div>
+     <div class="row" style="margin-top:10px"><button class="btn2" data-go="air" data-aq="${c.id}">Full air-quality page</button></div>`;
+  }
+  if(kind==='psi'){
+    const {psi,pm,ts}=sgPsi(),v=psi[a1];if(v==null)return '<div class="err">No data.</div>';const b=psiBand(v);
+    return `<h2 style="margin-top:0">Singapore ${esc(a1)} · air quality</h2><div style="text-align:center">${gaugeSVG(v,240)}<div class="chip" style="background:${b.c};color:${b.t};font-size:14px;padding:4px 14px">${AQ_FACE(v)} ${b.l}</div></div><p>${AQ_ADVICE(v)}</p>
+     <table><tr><td>Today's score (24-hour average)</td><td><b>${v}</b></td></tr><tr><td>Fine dust right now</td><td><b>${pm[a1]!=null?pm[a1]+' µg/m³':'–'}</b></td></tr><tr><td>Updated</td><td>${esc(String(ts||'').replace('T',' ').slice(0,16))}</td></tr></table><div class="small mute" style="margin-top:6px">Official National Environment Agency reading.</div>`;
+  }
+  if(kind==='health'){
+    const cc=a1||hCC(),m=healthModel(cc)||[];
+    if(a2){const e=m.find(z=>z.d.k===a2);if(e)return `<h2 style="margin-top:0">${cc==='SG'?'🇸🇬':'🇲🇾'} ${e.d.label}</h2>${hCard(e,cc)}`}
+    return `<h2 style="margin-top:0">${cc==='SG'?'🇸🇬 Singapore':'🇲🇾 Malaysia'} · health trends</h2>${m.map(e=>{const st=HST[e.status],F=e.mode==='live'?fmtN:(n=>Math.round(n));return `<div class="xrow"><div class="row" style="justify-content:space-between"><b>${e.d.icon} ${e.d.label}</b><span class="chip" style="background:${st[1]}">${st[0]} ${hText(e)}</span></div><div class="hnums"><div><span>${e.mode==='live'?'Latest week':'Now'}</span><b>${F(e.nowV)}</b><i>${esc(e.nowWhen)}</i></div><div class="pk"><span>Peak ▲</span><b>${F(e.pkV)}</b><i>${esc(e.pkWhen)}</i></div><div class="tr"><span>Lowest ▼</span><b>${F(e.trV)}</b><i>${esc(e.trWhen)}</i></div></div><div class="small mute">${e.mode==='live'?'Cases per week, past 12 months':'Typical pattern: index where 100 = busiest month (not case counts)'}</div></div>`}).join('')}
+     <div class="row" style="margin-top:10px"><button class="btn2" data-go="health" data-hc="${cc}">Open health trends</button></div>`;
+  }
+  if(kind==='cross'){
+    const only=a1;let h='<h2 style="margin-top:0">🚗 Causeway &amp; Second Link</h2>';
+    if(S.cross&&Object.keys(S.cross).length){h+=`<table><tr><th>Link</th><th>🇸🇬 → 🇲🇾</th><th>🇲🇾 → 🇸🇬</th></tr>${LINKS.filter(L=>S.cross[L.id]&&(!only||only===L.id)).map(L=>{const c=S.cross[L.id];return `<tr><td><b>${L.name}</b></td><td><b>${Math.round(c.to.min)}</b> min<div class="small mute">no traffic ${Math.round(c.to.free)}</div></td><td><b>${Math.round(c.back.min)}</b> min<div class="small mute">no traffic ${Math.round(c.back.free)}</div></td></tr>`}).join('')}</table>`}
+    else h+='<p class="mute">Add a Google Maps key or proxy in ⚙ Settings for minutes each way.</p>';
+    h+=`<div class="row" style="margin-top:10px"><a class="btn2" target="_blank" rel="noopener" href="https://www.google.com/maps/@1.4465,103.7686,14z/data=!5m1!1e1">Woodlands traffic ↗</a><a class="btn2 alt" target="_blank" rel="noopener" href="https://www.google.com/maps/@1.3400,103.6370,14z/data=!5m1!1e1">Tuas traffic ↗</a><button class="btn2 alt" data-go="traffic">Cameras &amp; incidents</button></div>`;return h;
+  }
+  if(kind==='mrtmap'){
+    const ops={NSL:'SMRT',EWL:'SMRT',CCL:'SMRT',TEL:'SMRT',BPL:'SMRT',NEL:'SBS Transit',DTL:'SBS Transit',SKL:'SBS Transit',PGL:'SBS Transit'};
+    return `<h2 style="margin-top:0">🗺️ MRT &amp; LRT network map</h2><div class="row" style="margin:6px 0">${trainSVG(110)}</div>
+     <p class="small">Tap a button to see the whole network. The official map shows every line, station and interchange.</p>
+     <div class="row"><a class="btn2" target="_blank" rel="noopener" href="https://www.lta.gov.sg/content/ltaweb/en/public-transport/mrt-and-lrt-trains/train-system-map.html">Official LTA system map ↗</a><a class="btn2 alt" target="_blank" rel="noopener" href="https://www.lta.gov.sg/content/ltaweb/en/public-transport/mrt-and-lrt-trains/riding-a-train.html">Download map (PDF) ↗</a><a class="btn2 alt" target="_blank" rel="noopener" href="https://www.google.com/maps/@1.3521,103.8198,12z/data=!5m1!1e2">Google Maps transit layer ↗</a></div>
+     <h3>Lines and operators</h3><div class="lines" style="grid-template-columns:1fr 1fr">${MRT_LINES.map(([c,n,col])=>`<div class="ln" data-detail="line:${c}"><span class="lb" style="background:${col}">${c}</span><div><b>${n}</b><div class="small mute">${ops[c]}</div></div></div>`).join('')}</div>`;
+  }
+  if(kind==='line'){
+    const L=MRT_LINES.find(z=>z[0]===a1),segs=(S.train&&S.train.AffectedSegments||[]).filter(s=>String(s.Line).toUpperCase()===a1);
+    return `<h2 style="margin-top:0"><span class="lb" style="background:${L[2]}">${L[0]}</span> ${L[1]} line</h2>`+(!S.train?'<p class="mute">Live status needs your LTA key and proxy (⚙ Settings).</p>':segs.length?segs.map(s=>`<div class="alert red">⚠️ ${esc(s.Direction||'')} – ${esc(s.Stations||'')}${s.FreePublicBus?'<br>🚌 Free bus: '+esc(s.FreePublicBus):''}</div>`).join(''):'<div class="alert green">✅ Running normally.</div>');
+  }
+  return '';
+}
+function openDetail(kind,a1,a2){
+  const d2=$('#dlg2');let h='';try{h=detailHTML(kind,a1,a2)}catch(e){console.error(e);h='<div class="err">Could not open details.</div>'}
+  $('#dlg2Body').innerHTML=h;if(!d2.open)d2.showModal();
+  $$('#dlg2Body [data-go]').forEach(b=>b.onclick=()=>{
+    if(b.dataset.sel){S.userPicked=true;S.sel=b.dataset.sel;store.set('city',S.sel);$('#citySel').value=S.sel}
+    if(b.dataset.aq){S.aqPicked=true;$('#aqCity').value=b.dataset.aq}
+    if(b.dataset.hc){store.set('hc',b.dataset.hc)}
+    d2.close();renderAll();go(b.dataset.go)});
+}
+document.addEventListener('click',e=>{
+  const t=e.target.closest('[data-detail]');if(!t||e.target.closest('a,select,button,input'))return;
+  const [k,a,b]=t.dataset.detail.split(':');openDetail(k,a,b);
+});
+$('#dlg2Close').onclick=()=>$('#dlg2').close();
+$('#dlg2').addEventListener('click',e=>{if(e.target===$('#dlg2'))$('#dlg2').close()});
+$('#ovSel').onchange=e=>{S.userPicked=true;S.sel=e.target.value;store.set('city',S.sel);$('#citySel').value=S.sel;renderAll()};
+$('#aqHeroSel').onchange=e=>{S.aqPicked=true;$('#aqCity').value=e.target.value;renderAir()};
+$('#aqCity').addEventListener('change',()=>{S.aqPicked=true});
+
 renderAll();refresh();locate();
 </script>
 </body>
