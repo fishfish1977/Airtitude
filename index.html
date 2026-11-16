@@ -1268,9 +1268,9 @@ let _lastNewsKey='';
 function ovNewsTick(){const k=S.sel+'|'+S.newsMode;if(k!==_lastNewsKey){_lastNewsKey=k;loadOvNews().then(renderOvNews)}}
 
 /* ---------- version + feedback ---------- */
-const APP_VERSION='2.6.0',APP_DATE='16 Nov 2026';
+const APP_VERSION='2.6.1',APP_DATE='16 Nov 2026';
 /* Feedback goes to the owner's inbox through Web3Forms (free). Get a key at web3forms.com (enter the inbox address, the key is emailed) and paste it here. */
-const FEEDBACK_KEY='';
+const FEEDBACK_KEY='97dcfb7d-dcdd-4d49-8fbd-38102dbaff77';
 $('#verTag').textContent='v'+APP_VERSION;
 $('#verFoot').innerHTML='Version '+APP_VERSION+' · updated '+APP_DATE+' · <a href="#" id="fbLink">Send feedback</a>';
 const openFb=e=>{if(e)e.preventDefault();$('#fbNote').textContent='';$('#fbNote').className='small';$('#fbSend').disabled=false;const d=$('#dlgFb');if(!d.open)d.showModal()};
