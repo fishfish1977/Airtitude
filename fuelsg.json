@@ -1,0 +1,5 @@
+{
+ "retailers": ["Esso","Shell","SPC","Caltex","Sinopec"],
+ "prices": {"92":[3.60,null,3.54,3.57,null],"95":[3.63,3.63,3.56,3.60,3.63],"98":[4.15,4.15,4.08,null,4.14],"Premium":[null,4.37,null,4.30,4.27],"Diesel":[4.07,4.07,4.00,4.04,4.01]},
+ "asOf": "2026-11-16", "live": false, "source": "motorist.sg (initial)"
+}
