@@ -38,14 +38,11 @@
   "Diesel": [
    4.07,
    4.07,
-   4.0,
+   4,
    4.04,
    4.01
   ]
  },
- "asOf": "2026-11-16",
- "live": false,
- "source": "seed values, to be replaced by the daily brand-page check",
  "brands": {
   "Esso": {
    "asOf": "2026-11-16",
@@ -63,14 +60,18 @@
    "source": null
   },
   "Caltex": {
-   "asOf": "2026-11-16",
-   "status": "seed",
-   "source": null
+   "asOf": "2026-11-17",
+   "status": "live",
+   "source": "https://www.caltex.com/sg/motorists/products-and-services/fuel-prices.html"
   },
   "Sinopec": {
    "asOf": "2026-11-16",
    "status": "seed",
    "source": null
   }
- }
+ },
+ "asOf": "2026-11-16",
+ "checked": "2026-11-17T02:37:45.028Z",
+ "live": true,
+ "source": "brand websites"
 }
