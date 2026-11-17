@@ -38,13 +38,39 @@
   "Diesel": [
    4.07,
    4.07,
-   4,
+   4.0,
    4.04,
    4.01
   ]
  },
- "asOf": "2026-11-17",
- "checked": "2026-11-17T01:31:09.724Z",
- "live": true,
- "source": "motorist.sg"
+ "asOf": "2026-11-16",
+ "live": false,
+ "source": "seed values, to be replaced by the daily brand-page check",
+ "brands": {
+  "Esso": {
+   "asOf": "2026-11-16",
+   "status": "seed",
+   "source": null
+  },
+  "Shell": {
+   "asOf": "2026-11-16",
+   "status": "seed",
+   "source": null
+  },
+  "SPC": {
+   "asOf": "2026-11-16",
+   "status": "seed",
+   "source": null
+  },
+  "Caltex": {
+   "asOf": "2026-11-16",
+   "status": "seed",
+   "source": null
+  },
+  "Sinopec": {
+   "asOf": "2026-11-16",
+   "status": "seed",
+   "source": null
+  }
+ }
 }
