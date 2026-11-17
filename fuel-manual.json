@@ -1,0 +1,4 @@
+{
+  "_help": "Optional hand corrections. Per brand: asOf (YYYY-MM-DD), prices {92,95,98,Premium,Diesel}, source. Newer asOf than the crawl wins. Delete the entry when no longer needed.",
+  "_example": { "Shell": { "asOf": "2026-11-17", "source": "shell.com.sg price board", "prices": { "95": 3.63, "98": 4.15, "Premium": 4.37, "Diesel": 4.07 } } }
+}
