@@ -1,7 +1,7 @@
 name: Update Singapore fuel prices
 on:
   schedule:
-    - cron: '17 */3 * * *'
+    - cron: '23 0 * * *'    # once a day, 08:23 Singapore time
   workflow_dispatch: {}
 permissions:
   contents: write
@@ -12,14 +12,10 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: 20 }
-      - name: Plain request
-        run: node fetch-fuel.mjs
-      - name: Headless browser fallback
-        run: |
-          if [ "$(date -u +%F)" != "$(node -e "console.log(JSON.parse(require('fs').readFileSync('fuelsg.json','utf8')).asOf||'')")" ]; then
-            npm i --no-save playwright >/dev/null 2>&1 && npx playwright install --with-deps chromium >/dev/null 2>&1
-            node fetch-fuel.mjs
-          fi
+      - name: Install a headless browser (for pages that fill in prices with JavaScript)
+        run: npm i --no-save playwright && npx playwright install --with-deps chromium
+      - name: Read each brand's own price page
+        run: node fetch-fuel.mjs --browser
       - name: Commit if changed
         run: |
           git config user.name "fuel-bot"; git config user.email "fuel-bot@users.noreply.github.com"
