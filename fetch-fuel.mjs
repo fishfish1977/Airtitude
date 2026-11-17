@@ -1,10 +1,10 @@
-// Builds data/fuelsg.json (Singapore posted pump prices) once a day.
+// Builds fuelsg.json (Singapore posted pump prices) once a day.
 // Sources: each fuel brand's own public price page. Nothing here hides what it is:
 //  - it identifies itself with an honest User-Agent,
 //  - it reads robots.txt and skips a page that disallows it,
 //  - it makes at most one page request per brand per run.
 // A brand that cannot be read keeps its last good price and is marked stale.
-// data/fuel-manual.json lets a person correct any brand by hand (newer asOf wins).
+// fuel-manual.json lets a person correct any brand by hand (newer asOf wins).
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 
 const UA = 'AirtitudeBot/1.0 (+https://fishfish1977.github.io/Airtitude/; daily pump-price check)';
@@ -20,6 +20,12 @@ const SOURCES = {
   SPC: ['https://www.spc.com.sg/pump-prices'],
   Sinopec: ['https://www.sinopecsg.com/fuel-prices'],
 };
+
+// Brands that cannot be read automatically. Esso's site answers automated requests with 403, so we do not try
+// to get around it: enter Esso by hand in fuel-manual.json (see README note in that file).
+const MANUAL_ONLY = { Esso: 'site refuses automated reads' };
+// Grades a brand does not sell, so a look-alike line (e.g. Caltex Platinum) is never mistaken for regular 98.
+const NO_GRADES = { Caltex: ['98'], Shell: ['92'], Sinopec: ['92'] };
 
 // Words each brand uses for a grade. First match per grade wins; the price must follow within 120 characters.
 const GRADE_WORDS = {
@@ -83,6 +89,7 @@ async function viaBrowser(url) {
 }
 
 async function readBrand(name, useBrowser) {
+  if (MANUAL_ONLY[name]) { console.log(name, 'manual only:', MANUAL_ONLY[name]); return null; }
   for (const url of SOURCES[name] || []) {
     if (!(await allowedByRobots(url))) { console.log(name, url, 'skipped: robots.txt disallows'); continue; }
     for (const how of useBrowser ? ['fetch', 'browser'] : ['fetch']) {
@@ -99,9 +106,9 @@ async function readBrand(name, useBrowser) {
 
 if (process.argv[1] && process.argv[1].endsWith('fetch-fuel.mjs')) {
   const useBrowser = process.argv.includes('--browser');
-  const file = 'data/fuelsg.json';
+  const file = 'fuelsg.json';
   const old = existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : { retailers: RETAILERS, prices: {}, brands: {} };
-  const manual = existsSync('data/fuel-manual.json') ? JSON.parse(readFileSync('data/fuel-manual.json', 'utf8')) : {};
+  const manual = existsSync('fuel-manual.json') ? JSON.parse(readFileSync('fuel-manual.json', 'utf8')) : {};
   const today = new Date().toISOString().slice(0, 10);
   const brands = old.brands || {};
   const prices = JSON.parse(JSON.stringify(old.prices || {}));
@@ -112,9 +119,10 @@ if (process.argv[1] && process.argv[1].endsWith('fetch-fuel.mjs')) {
     const man = manual[name];
     if (got) {
       for (const g of GRADES) {
-        const v = got.prices[g];
+        const v = (NO_GRADES[name] || []).includes(g) ? null : got.prices[g];
         const prev = prices[g]?.[i];
         // reject a jump of more than 40 cents in one day as a probable parsing error
+        if ((NO_GRADES[name] || []).includes(g) && prices[g]) prices[g][i] = null;
         if (v != null && (prev == null || Math.abs(v - prev) <= 0.40)) { prices[g] = prices[g] || [null, null, null, null, null]; prices[g][i] = v; }
         else if (v != null) console.log(name, g, 'ignored suspicious jump', prev, '->', v);
       }
