@@ -60,7 +60,7 @@
    "source": null
   },
   "Caltex": {
-   "asOf": "2026-11-24",
+   "asOf": "2026-11-25",
    "status": "live",
    "source": "https://www.caltex.com/sg/motorists/products-and-services/fuel-prices.html"
   },
@@ -71,7 +71,7 @@
   }
  },
  "asOf": "2026-11-16",
- "checked": "2026-11-24T01:34:21.620Z",
+ "checked": "2026-11-25T01:40:50.018Z",
  "live": true,
  "source": "brand websites"
 }
