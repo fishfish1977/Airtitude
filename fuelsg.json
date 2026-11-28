@@ -11,14 +11,14 @@
    3.6,
    null,
    3.54,
-   3.57,
+   3.53,
    null
   ],
   "95": [
    3.63,
    3.63,
    3.56,
-   3.6,
+   3.56,
    3.63
   ],
   "98": [
@@ -32,7 +32,7 @@
    null,
    4.37,
    null,
-   4.3,
+   4.26,
    4.27
   ],
   "Diesel": [
@@ -60,7 +60,7 @@
    "source": null
   },
   "Caltex": {
-   "asOf": "2026-11-27",
+   "asOf": "2026-11-28",
    "status": "live",
    "source": "https://www.caltex.com/sg/motorists/products-and-services/fuel-prices.html"
   },
@@ -71,7 +71,7 @@
   }
  },
  "asOf": "2026-11-16",
- "checked": "2026-11-27T01:42:24.829Z",
+ "checked": "2026-11-28T01:37:18.182Z",
  "live": true,
  "source": "brand websites"
 }
